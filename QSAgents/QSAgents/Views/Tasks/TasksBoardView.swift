@@ -190,7 +190,14 @@ struct TasksBoardView: View {
                                             focusAgentForTask(id)
                                         },
                                         onMove: { id, col in taskStore.move(id, to: col) },
-                                        onStart: { startTask($0) },
+                                        onStart: { id in
+                                            // REVIEW: open detail/diff — do not cold-restart via Avvia.
+                                            if taskStore.task(id: id)?.column == .review {
+                                                openReview(id)
+                                            } else {
+                                                startTask(id)
+                                            }
+                                        },
                                         onSendOrchestrator: { sendToOrchestrator($0) },
                                         onComplete: { completeTask($0) },
                                         onDelete: { confirmDelete($0) },
@@ -207,8 +214,11 @@ struct TasksBoardView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                         // Agent log OR archive (files touched) for selected task — including DONE.
+                        // IN REVISIONE always prefers the archive panel (diff / Applica feedback).
                         Group {
-                            if let session = agentForSelectedTask {
+                            if let task = selectedTask, task.column == .review {
+                                TaskArchivePanel(task: task)
+                            } else if let session = agentForSelectedTask {
                                 AgentWorkLogPanel(
                                     session: session,
                                     title: "Log agent della task",
@@ -361,6 +371,14 @@ struct TasksBoardView: View {
         }
     }
 
+    /// IN REVISIONE primary CTA: show file diff / evidence — not another Avvia/restart.
+    private func openReview(_ id: UUID) {
+        taskStore.select(id)
+        focusAgentForTask(id)
+        toast = L("Revisiona sotto: file + Applica feedback (niente riavvio).")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) { toast = nil }
+    }
+
     private func startTask(_ id: UUID) {
         let gate = taskStore.canStart(id)
         if !gate.ok {
@@ -385,9 +403,9 @@ struct TasksBoardView: View {
         let reused = agents.agentForTask(id).map { agents.runtime.isRunning($0.id) || $0.status == .thinking || $0.status == .active } ?? false
         toast = ok
             ? (reused
-               ? "Stesso agent/PTY — nessun nuovo terminale."
-               : "Orchestratore ha lanciato/ripreso il builder.")
-            : "Avvio non riuscito — vedi messaggio orchestratore."
+               ? L("Già in corso — vedi log sotto (nessun nuovo terminale).")
+               : L("Orchestratore ha lanciato/ripreso il builder."))
+            : L("Avvio non riuscito — vedi messaggio orchestratore.")
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) { toast = nil }
     }
 
@@ -433,8 +451,41 @@ struct TasksBoardView: View {
         }
         pendingBulkClear = nil
         showBulkClearConfirm = false
-        toast = n > 0 ? "Rimosse \(n) task" : "Nessuna task da rimuovere"
+        toast = n > 0 ? "Rimosse \(n) task" : L("Nessuna task da rimuovere")
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { toast = nil }
+    }
+}
+
+/// Board primary CTA labels by column. REVIEW opens detail/diff; others start/resume.
+@MainActor
+enum TaskBoardStartLabel {
+    static func title(for column: TaskColumn, blocked: Bool = false) -> String {
+        if blocked { return L("Bloccata") }
+        switch column {
+        case .review: return L("Revisiona")
+        case .inProgress: return L("Continua")
+        case .todo, .done: return L("Avvia")
+        }
+    }
+
+    static func systemImage(for column: TaskColumn, blocked: Bool = false) -> String {
+        if blocked { return "lock.fill" }
+        switch column {
+        case .review: return "eye.fill"
+        case .inProgress: return "forward.fill"
+        case .todo, .done: return "play.fill"
+        }
+    }
+
+    static func help(for column: TaskColumn) -> String {
+        switch column {
+        case .review:
+            return L("Apri dettaglio e diff sotto — Applica feedback per ritocchi (niente riavvio)")
+        case .inProgress:
+            return L("Continua lo stesso agent — nessun nuovo terminale se già in corso")
+        case .todo, .done:
+            return L("Sposta in corso, crea agent builder e log in-app")
+        }
     }
 }
 
@@ -478,19 +529,19 @@ struct TaskColumnView: View {
                         )
                         .contextMenu {
                             if task.column != .done {
-                                Button("✓ Segna completata") { onComplete(task.id) }
+                                Button(L("✓ Segna completata")) { onComplete(task.id) }
                             }
-                            Button("▶ Avvia (agent + terminale)") { onStart(task.id) }
-                            Button("✦ Invia all'orchestratore") { onSendOrchestrator(task.id) }
+                            Button("▶ \(TaskBoardStartLabel.title(for: task.column))") { onStart(task.id) }
+                            Button(L("✦ Invia all'orchestratore")) { onSendOrchestrator(task.id) }
                             Divider()
                             ForEach(TaskColumn.allCases) { col in
                                 if col != task.column {
-                                    Button("Sposta in \(col.rawValue)") {
+                                    Button(L("Sposta in") + " \(col.rawValue)") {
                                         onMove(task.id, col)
                                     }
                                 }
                             }
-                            Menu("Modello") {
+                            Menu(L("Modello")) {
                                 let live: [String] = {
                                     var seen = Set<String>()
                                     var out: [String] = []
@@ -665,7 +716,7 @@ struct TaskCardView: View {
             // Live agent hint if any session is on this task
             // (resolved by parent via agents store is heavier; show generic cue)
             if task.column == .inProgress {
-                Text("Avvia → log sotto · click card per focus")
+                Text(L("Continua → log sotto · click card per focus"))
                     .font(QS.Font.mono(9))
                     .foregroundStyle(QS.Color.agentThinking)
             }
@@ -702,7 +753,10 @@ struct TaskCardView: View {
                     .help("Sposta in COMPLETATE")
 
                     Button(action: onStart) {
-                        Label(isBlocked ? "Bloccata" : "Avvia", systemImage: isBlocked ? "lock.fill" : "play.fill")
+                        Label(
+                            TaskBoardStartLabel.title(for: task.column, blocked: isBlocked),
+                            systemImage: TaskBoardStartLabel.systemImage(for: task.column, blocked: isBlocked)
+                        )
                             .font(QS.Font.ui(11, weight: .semibold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 8)
@@ -714,7 +768,7 @@ struct TaskCardView: View {
                     .disabled(isBlocked)
                     .help(isBlocked
                           ? "Completa prima: \(blockedBy.joined(separator: ", "))"
-                          : "Sposta in corso, crea agent builder e log in-app")
+                          : TaskBoardStartLabel.help(for: task.column))
                 }
 
                 Button(action: onSendOrchestrator) {

@@ -1962,11 +1962,20 @@ final class OrchestratorEngine: ObservableObject {
 
         let llmHint: String
         if let err = lastLLMError {
-            llmHint = """
-            **LLM fallito:** \(err)
+            let lower = err.lowercased()
+            if lower.contains("402") || lower.contains("crediti") || lower.contains("credit") {
+                llmHint = """
+                **Crediti insufficienti:** \(err)
 
-            Controlla **Integrazioni** (API key), il modello selezionato, o prova un altro provider dal selettore live (es. OpenAI / SpaceX AI).
-            """
+                Ricarica su [openrouter.ai/settings/credits](https://openrouter.ai/settings/credits), abbassa `max_tokens` / modello, oppure scegli un altro provider dal selettore live.
+                """
+            } else {
+                llmHint = """
+                **LLM fallito:** \(err)
+
+                Controlla **Integrazioni** (API key), il modello selezionato, o prova un altro provider dal selettore live (es. OpenAI / SpaceX AI).
+                """
+            }
         } else if let p = selectedProviderKind, LLMClient.shared.hasKey(p) {
             llmHint = "Avevo **\(p.displayName)** configurato ma la chiamata non è andata a buon fine. Controlla key/modello o cambia provider."
         } else if LLMClient.shared.preferredProvider() != nil {

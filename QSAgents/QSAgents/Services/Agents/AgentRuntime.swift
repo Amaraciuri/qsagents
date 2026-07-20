@@ -259,13 +259,21 @@ final class AgentRuntime {
         var totalUsage = LLMUsage.zero
         var finished = false
         var exploreOnlySteps = 0
+        var consecutiveSearchKnowledge = 0
         var emptyRetries = 0
+        var creditsRetried = false
         let goalMode = store?.mission?.goalMode == true
         let tokenBudget = goalMode ? TokenBudget.goalAgentSessionBudget : TokenBudget.agentSessionBudget
         let reserve = goalMode ? TokenBudget.goalAgentBudgetReserve : TokenBudget.agentBudgetReserve
-        let maxCompletion = goalMode ? TokenBudget.goalAgentMaxCompletion : TokenBudget.agentMaxCompletion
+        var maxCompletion = TokenBudget.agentMaxCompletion(provider: useProvider, goalMode: goalMode)
         if goalMode {
             store?.append(sessionId, "GOAL MODE · budget \(tokenBudget) tok · completion \(maxCompletion)", level: .muted)
+        } else if useProvider == .openRouter {
+            store?.append(
+                sessionId,
+                "OpenRouter · completion cap \(maxCompletion) (evita 402 su max_tokens alti)",
+                level: .muted
+            )
         }
         for step in 1...maxSteps {
             if shouldStop(sessionId) {
@@ -306,6 +314,26 @@ final class AgentRuntime {
                     """
                 ))
                 store?.append(sessionId, "Nudge: conferma target o patch tracked (non rush)", level: .thinking)
+                if history.count > TokenBudget.agentHistoryMessages + 2 {
+                    history = [history[0]] + Array(history.suffix(TokenBudget.agentHistoryMessages - 1))
+                }
+            }
+
+            // Stall: search_knowledge looping without reading or patching
+            if isBuilder, consecutiveSearchKnowledge >= 2 {
+                history.append(LLMMessage(
+                    role: .user,
+                    content: """
+                    STALLO: \(consecutiveSearchKnowledge) search_knowledge di fila senza read_file / propose_patch.
+                    OBBLIGO prossimo tool: (1) read_file sul path:line migliore dal locate, POI (2) propose_patch sul file TRACKED.
+                    Vietato un altro search_knowledge / repo_capsule finché non hai letto o patchato.
+                    """
+                ))
+                store?.append(
+                    sessionId,
+                    "Nudge antistallo: stop search_knowledge → read_file poi propose_patch",
+                    level: .warning
+                )
                 if history.count > TokenBudget.agentHistoryMessages + 2 {
                     history = [history[0]] + Array(history.suffix(TokenBudget.agentHistoryMessages - 1))
                 }
@@ -476,6 +504,16 @@ final class AgentRuntime {
                     exploreOnlySteps = 0
                 }
 
+                // Consecutive search_knowledge without read/patch → stall counter
+                let names = limitedCalls.map(\.name)
+                if names.contains(where: { $0 == .read_file || $0 == .propose_patch || $0 == .apply_patch }) {
+                    consecutiveSearchKnowledge = 0
+                } else if names.allSatisfy({ $0 == .search_knowledge }) {
+                    consecutiveSearchKnowledge += 1
+                } else {
+                    consecutiveSearchKnowledge = 0
+                }
+
                 if shouldStop(sessionId) {
                     finishCancelled(sessionId)
                     return
@@ -547,6 +585,43 @@ final class AgentRuntime {
                 let errMsg = error.localizedDescription
                 store?.append(sessionId, "Errore LLM: \(errMsg)", level: .error)
                 let lower = errMsg.lowercased()
+                let llmErr = error as? LLMClientError
+
+                // OpenRouter / credits: one cheaper retry, then stop with clear UX (not "bad model / rete").
+                if let llmErr, llmErr.isCreditsFailure, !creditsRetried, !shouldStop(sessionId) {
+                    creditsRetried = true
+                    let afford = llmErr.suggestedMaxTokensCap
+                    let reduced = min(
+                        maxCompletion - 400,
+                        afford ?? (maxCompletion * 2 / 3)
+                    )
+                    let next = max(TokenBudget.openRouterMinCompletion, reduced)
+                    if next < maxCompletion {
+                        maxCompletion = next
+                        store?.append(
+                            sessionId,
+                            L("Crediti bassi (402) — ritento con max_tokens") + " \(maxCompletion). "
+                                + L("Se fallisce: ricarica OpenRouter o scegli un modello più economico."),
+                            level: .warning
+                        )
+                        continue
+                    }
+                }
+                if let llmErr, llmErr.isCreditsFailure {
+                    store?.setStatus(sessionId, .error)
+                    store?.append(
+                        sessionId,
+                        L("Stop: crediti OpenRouter insufficienti (HTTP 402). Ricarica su openrouter.ai/settings/credits, abbassa il modello, o riprova — non è un bug di key/rete."),
+                        level: .warning
+                    )
+                    if let tid = tools.taskId {
+                        tasks?.move(tid, to: .review)
+                        tasks?.appendEvidence(tid, "llm-402-credits")
+                    }
+                    store?.agentDidFinish(sessionId: sessionId, summary: "llm 402 credits: \(errMsg)")
+                    return
+                }
+
                 // Bad model id (e.g. "OpenRouter/anthropic/…") — fix id and stay in LLM loop.
                 let badModel = lower.contains("not a valid model") || lower.contains("invalid model")
                     || (lower.contains("model") && lower.contains("400"))

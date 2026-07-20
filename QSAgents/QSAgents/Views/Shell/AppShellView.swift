@@ -33,7 +33,7 @@ struct AppShellView: View {
                         case .workspace: WorkspaceEditorView()
                         }
                     case .monitor:
-                        KnowledgeGraphView()
+                        KnowledgeHubView()
                     }
                 }
             }

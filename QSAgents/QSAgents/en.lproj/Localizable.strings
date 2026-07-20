@@ -214,7 +214,7 @@
 "Avvio Claude fallito" = "Failed to start Claude";
 "Avvio diretto da board — orchestratore in controllo (sub-agent builder)." = "Avvio diretto from board — orchestratore in controllo (sub-agent builder).";
 "Avvio missione Swarm…" = "Starting Swarm mission…";
-"Avvio non riuscito — vedi messaggio orchestratore." = "Avvio not riuscito — vedi messaggio orchestratore.";
+"Avvio non riuscito — vedi messaggio orchestratore." = "Start failed — see orchestrator message.";
 "avvisa (lista vuota — aggiungi progetti)" = "warn (empty list — add projects)";
 "Avvisa se cwd/path non è in lista, ma non blocca." = "Avvisa se cwd/path not è in lista, ma not blocca.";
 "Avviso" = "Warning";
@@ -222,6 +222,7 @@
 "Azzera sessione, totale e stima $" = "Azzera session, totale and stima $";
 "backlog progetto" = "backlog project";
 "Benvenuto in QS Agents" = "Welcome to QS Agents";
+"Bloccata" = "Blocked";
 "BOARD QS Tasks (questo workspace): VUOTO → DEVI chiamare create_task 3–6 volte ORA." = "BOARD QS Tasks (questo workspace): VUOTO → DEVI chiamare create_task 3–6 volte ORA.";
 "Board sweep GOAL — niente PLAN, riprendo task aperte." = "Board sweep GOAL — niente PLAN, riprendo task aperte.";
 "Bootstrap locale chiude il gate; «completa task» salta PLAN; pulse riparte se tutti idle; deps REVIEW ok." = "Bootstrap local chiude the gate; «completa task» salta PLAN; pulse riparte se tutti idle; deps REVIEW ok.";
@@ -337,6 +338,8 @@
 "Console agent in Terminali come Swarm; log tool completi; code brain con reindex mtime e hot-path." = "Console agent in Terminals come Swarm; log tool completi; code brain with reindex mtime and hot-path.";
 "Contesto più ricco" = "Contesto more ricco";
 "Continua" = "Continue";
+"Continua lo stesso agent — nessun nuovo terminale se già in corso" = "Continue the same agent — no new terminal if already running";
+"Continua → log sotto · click card per focus" = "Continue → log below · click card to focus";
 "Controlla Git / GitHub Desktop su questo path." = "Controlla Git / GitHub Desktop su this path.";
 "Coord + scout + builder + reviewer usano lo stesso modello" = "Coord + scout + builder + reviewer usano the stesso model";
 "Coord senza key non nasconde i builder LLM: summary spiega routing Swarm." = "Coord without key not nasconde the builder LLM: summary spiega routing Swarm.";
@@ -450,6 +453,8 @@
 "GitHub Desktop vede le diff" = "GitHub Desktop vede the diff";
 "GitService non disponibile" = "GitService unavailable";
 "Già completata" = "Already completed";
+"Già in corso — Continua non riavvia. Vedi log sotto (nessun nuovo terminale/agent)." = "Already running — Continue does not restart. See log below (no new terminal/agent).";
+"Già in corso — vedi log sotto (nessun nuovo terminale)." = "Already running — see log below (no new terminal).";
 "Gli agent già avviati restano sul modello con cui sono partiti; le nuove missioni usano questa routing." = "Already-running agents keep the model they started with; new missions use this routing.";
 "Gli agent leggono in parallelo, patchano con diff e cercano nel repo con ranking." = "Gli agent leggono in parallelo, patchano with diff and cercano in the repo with ranking.";
 "Gli agent useranno l'indice dopo il salvataggio su disco" = "Gli agent useranno l'indice after the salvataggio su disco";
@@ -706,7 +711,7 @@
 "Opzionale: scarica un sottoinsieme OpenRouter (non l’intero catalogo)" = "Optional: download an OpenRouter subset (not the full catalog)";
 "Orchestratore" = "Orchestrator";
 "Orchestratore (Chat full)" = "Orchestrator (full chat)";
-"Orchestratore (chat)" = "Orchestrator (chat)";
+"Orchestratore ha lanciato/ripreso il builder." = "Orchestrator launched/resumed the builder.";
 "Orchestratore = layer su Claude PTY" = "Orchestrator = layer su Claude PTY";
 "Orchestratore avvia task" = "Orchestrator avvia task";
 "Orchestratore ha lanciato/ripreso il builder." = "Orchestrator ha lanciato/ripreso the builder.";
@@ -813,6 +818,7 @@
 "REVIEW non riparte da sola" = "REVIEW not riparte from sola";
 "REVIEW non sblocca DAG; progress≠DONE; complete_task flag; clear+stop." = "REVIEW not sblocca DAG; progress≠DONE; complete_task flag; clear+stop.";
 "Review rischi e checklist PR sulle task della missione. No patch. finish con note actionable." = "Review rischi and checklist PR sulle task of the mission. No patch. finish with note actionable.";
+"Revisiona" = "Review";
 "Revisione" = "Review";
 "Riavvia terminale corrente" = "Restart current terminal";
 "Ricarica stato" = "Reload status";
@@ -827,6 +833,7 @@
 "Rimuovi" = "Remove";
 "rimuovi task" = "rimuovi task";
 "rimuovi task " = "rimuovi task";
+"Riprendi il builder sulla task in revisione (stesso agent/PTY se già esiste)" = "Resume the builder on the review task (same agent/PTY if it already exists)";
 "riprendi task" = "riprendi task";
 "Rispondi alle domande o avvia i builder" = "Rispondi alle domande or avvia the builder";
 "Risposta GitHub non valida" = "Risposta GitHub not valida";
@@ -901,6 +908,7 @@
 "Solo terminale" = "Solo terminal";
 "Specifica la task: `elimina task <titolo>` o selezionala prima." = "Specifica the task: `elimina task <titolo>` or selezionala first.";
 "Speech non disponibile" = "Speech unavailable";
+"Sposta in corso, crea agent builder e log in-app" = "Move to in progress, create builder agent and in-app log";
 "Stage" = "Stage";
 "Stage All" = "Stage All";
 "Stage all" = "Stage all";
@@ -1054,3 +1062,11 @@
 "File non leggibile:" = "File not readable:";
 "Verifica il path (file, non cartella) o usa list_dir." = "Check the path (file, not folder) or use list_dir.";
 "Hai già listato questa cartella — non ripetere list_dir sulla root. Usa read_file su un file concreto (package.json, *.css, *.js)." = "You already listed this folder — do not list_dir the root again. Use read_file on a concrete file (package.json, *.css, *.js).";
+"Crediti bassi (402) — ritento con max_tokens" = "Low credits (402) — retrying with max_tokens";
+"Se fallisce: ricarica OpenRouter o scegli un modello più economico." = "If it fails: top up OpenRouter or pick a cheaper model.";
+"Stop: crediti OpenRouter insufficienti (HTTP 402). Ricarica su openrouter.ai/settings/credits, abbassa il modello, o riprova — non è un bug di key/rete." = "Stop: OpenRouter credits insufficient (HTTP 402). Top up at openrouter.ai/settings/credits, use a cheaper model, or retry — this is not a key/network bug.";
+"Revisiona sotto: file + Applica feedback (niente riavvio)." = "Review below: files + Apply feedback (no restart).";
+"Apri dettaglio e diff sotto — Applica feedback per ritocchi (niente riavvio)" = "Open detail and diff below — Apply feedback for tweaks (no restart)";
+"✓ Segna completata" = "✓ Mark completed";
+"Sposta in" = "Move to";
+"Nessuna task da rimuovere" = "No tasks to remove";

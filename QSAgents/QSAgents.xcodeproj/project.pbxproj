@@ -68,6 +68,9 @@
 		F2A3TUT004B5C6D7E819 /* TutorialsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2TUT003A4B5C6D708 /* TutorialsView.swift */; };
 		F2A3PROD04B5C6D7E819 /* ProductionDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2PROD03A4B5C6D708 /* ProductionDiagnostics.swift */; };
 		314A8E74753947518363D05A /* KnowledgeGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 805F6E9DDDAD41828113B588 /* KnowledgeGraphView.swift */; };
+		F2A3B4C5D6E7589012OPS002 /* OperationalPlanStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6478901OPS001 /* OperationalPlanStore.swift */; };
+		F2A3B4C5D6E7589012OPS004 /* OperationalPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6478901OPS003 /* OperationalPlanView.swift */; };
+		F2A3B4C5D6E7589012OPS006 /* KnowledgeHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F2A3B4C5D6478901OPS005 /* KnowledgeHubView.swift */; };
 		95B3AD37AF724324A2C7024D /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC79599D5E064E0B9F22B108 /* OnboardingView.swift */; };
 		3E47BCE173D54FCABC64145E /* OrchestratorChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EC1681FD1214BDF81774C30 /* OrchestratorChatView.swift */; };
 		DA453A0729084D47A17A507B /* ChatHistorySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD356F1179A04418813F7F79 /* ChatHistorySheet.swift */; };
@@ -128,6 +131,7 @@
 		BC382AEDAFFD4B85A33B9E92 /* KnowledgeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeStore.swift; sourceTree = "<group>"; };
 		E1F2A3B4C5D6478901FTS001 /* KnowledgeFTS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeFTS.swift; sourceTree = "<group>"; };
 		E1F2A3B4C5D6478901BRN001 /* ProjectCodeBrain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectCodeBrain.swift; sourceTree = "<group>"; };
+		E1F2A3B4C5D6478901OPS001 /* OperationalPlanStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationalPlanStore.swift; sourceTree = "<group>"; };
 		22C9395BFA574C3CAE5DC966 /* JSONStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONStore.swift; sourceTree = "<group>"; };
 		E5F6A7B8C9D04E1F2A3B4C5D /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		E625710E11434AA68F5EE6E6 /* LLMClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMClient.swift; sourceTree = "<group>"; };
@@ -166,6 +170,8 @@
 		E1F2TUT003A4B5C6D708 /* TutorialsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialsView.swift; sourceTree = "<group>"; };
 		E1F2PROD03A4B5C6D708 /* ProductionDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductionDiagnostics.swift; sourceTree = "<group>"; };
 		805F6E9DDDAD41828113B588 /* KnowledgeGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeGraphView.swift; sourceTree = "<group>"; };
+		E1F2A3B4C5D6478901OPS003 /* OperationalPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationalPlanView.swift; sourceTree = "<group>"; };
+		E1F2A3B4C5D6478901OPS005 /* KnowledgeHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeHubView.swift; sourceTree = "<group>"; };
 		BC79599D5E064E0B9F22B108 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		4EC1681FD1214BDF81774C30 /* OrchestratorChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrchestratorChatView.swift; sourceTree = "<group>"; };
 		BD356F1179A04418813F7F79 /* ChatHistorySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHistorySheet.swift; sourceTree = "<group>"; };
@@ -333,6 +339,7 @@
 				BC382AEDAFFD4B85A33B9E92 /* KnowledgeStore.swift */,
 				E1F2A3B4C5D6478901FTS001 /* KnowledgeFTS.swift */,
 				E1F2A3B4C5D6478901BRN001 /* ProjectCodeBrain.swift */,
+				E1F2A3B4C5D6478901OPS001 /* OperationalPlanStore.swift */,
 			);
 			path = Knowledge;
 			sourceTree = "<group>";
@@ -481,6 +488,8 @@
 			isa = PBXGroup;
 			children = (
 				805F6E9DDDAD41828113B588 /* KnowledgeGraphView.swift */,
+				E1F2A3B4C5D6478901OPS005 /* KnowledgeHubView.swift */,
+				E1F2A3B4C5D6478901OPS003 /* OperationalPlanView.swift */,
 			);
 			path = Knowledge;
 			sourceTree = "<group>";
@@ -792,6 +801,9 @@
 				F2A3PROD04B5C6D7E819 /* ProductionDiagnostics.swift in Sources */,
 				B2C3GDPR4D5E6F708192A3B4 /* GDPRPrivacyView.swift in Sources */,
 				314A8E74753947518363D05A /* KnowledgeGraphView.swift in Sources */,
+				F2A3B4C5D6E7589012OPS002 /* OperationalPlanStore.swift in Sources */,
+				F2A3B4C5D6E7589012OPS006 /* KnowledgeHubView.swift in Sources */,
+				F2A3B4C5D6E7589012OPS004 /* OperationalPlanView.swift in Sources */,
 				95B3AD37AF724324A2C7024D /* OnboardingView.swift in Sources */,
 				3E47BCE173D54FCABC64145E /* OrchestratorChatView.swift in Sources */,
 				DA453A0729084D47A17A507B /* ChatHistorySheet.swift in Sources */,
@@ -859,7 +871,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QSAgents/Info.plist;
@@ -868,7 +880,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.4;
+				MARKETING_VERSION = 1.0.5;
 				ENABLE_TESTABILITY = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.qsagents.mac;
 				PRODUCT_NAME = "QS Agents";
@@ -882,7 +894,7 @@
 				CODE_SIGN_ENTITLEMENTS = QSAgents/QSAgents.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 18;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QSAgents/Info.plist;
@@ -891,7 +903,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.4;
+				MARKETING_VERSION = 1.0.5;
 				ENABLE_TESTABILITY = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.qsagents.mac;
 				PRODUCT_NAME = "QS Agents";

@@ -122,14 +122,46 @@ final class WorkspaceStore: ObservableObject {
     }
 
     /// Mark files touched by agent writes (absolute paths).
+    /// Also reloads open editor tabs from disk when the user has no unsaved edits (avoids stale overwrite).
     func markExternallyModified(paths: [String]) {
         var next = dirtyFilePaths
+        var standardized: [String] = []
         for p in paths {
             let std = (p as NSString).standardizingPath
             guard !std.isEmpty else { continue }
             next.insert(std)
+            standardized.append(std)
         }
         if next != dirtyFilePaths { dirtyFilePaths = next }
+        reloadOpenTabsFromDisk(paths: standardized)
+    }
+
+    /// Reload tab/editor content after agent (or external) write.
+    /// Skips tabs the user has edited locally so we don't clobber unsaved work.
+    private func reloadOpenTabsFromDisk(paths: [String]) {
+        guard !paths.isEmpty else { return }
+        let targets = Set(paths.map { ($0 as NSString).standardizingPath })
+        syncOpenToTab()
+        var changed = false
+        for i in tabs.indices {
+            let std = (tabs[i].path as NSString).standardizingPath
+            guard targets.contains(std) else { continue }
+            if tabs[i].isDirty { continue } // keep user draft; red dot already marks conflict
+            guard let data = try? Data(contentsOf: URL(fileURLWithPath: tabs[i].path)),
+                  let text = String(data: data, encoding: .utf8)
+                    ?? String(data: data, encoding: .isoLatin1) else { continue }
+            if tabs[i].content == text { continue }
+            tabs[i].content = text
+            tabs[i].isDirty = false
+            changed = true
+            if selectedTabID == tabs[i].id {
+                fileContent = text
+                isDirty = false
+            }
+        }
+        if changed {
+            objectWillChange.send()
+        }
     }
 
     /// Sync red dots from `git status` (relative paths → absolute under root).

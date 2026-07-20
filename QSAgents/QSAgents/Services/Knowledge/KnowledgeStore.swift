@@ -548,7 +548,7 @@ enum KnowledgeIndexer {
 
         // Place folders
         for depth in foldersByDepth.keys.sorted() {
-            let list = foldersByDepth[depth]!.sorted()
+            guard let list = foldersByDepth[depth]?.sorted() else { continue }
             let y = min(0.72, 0.06 + Double(depth) * 0.13)
             for (i, folder) in list.enumerated() {
                 let n = max(list.count, 1)

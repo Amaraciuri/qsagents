@@ -240,13 +240,15 @@ final class TerminalManager: ObservableObject {
         let path = session?.cwd
 
         let decision: SafetyDecision
-        if bypassSafety || safety == nil {
+        if bypassSafety {
             decision = .allow
-        } else {
-            decision = safety!.evaluate(
+        } else if let safety {
+            decision = safety.evaluate(
                 command,
                 context: SafetyContext(source: source, path: path, role: role)
             )
+        } else {
+            decision = .allow
         }
 
         switch decision {

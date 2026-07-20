@@ -54,6 +54,24 @@ enum AppChangelog {
     /// Newest first.
     static let releases: [Entry] = [
         Entry(
+            id: "1.0.5",
+            version: "1.0.5",
+            date: "20 Jul 2026",
+            title: "Knowledge Operativa · Task flow · Credits UX",
+            tagline: "TABELLA OPERATIVA layer, clearer task Avvia/Continua/Revisiona, OpenRouter 402 credits messaging.",
+            kind: .feature,
+            highlights: [
+                .init(icon: "tablecells", title: "Knowledge Operativa",
+                      detail: "Additive TABELLA OPERATIVA layer in Knowledge for operational plans. (IT: layer Knowledge Operativa / TABELLA OPERATIVA.)"),
+                .init(icon: "play.circle", title: "Avvia · Continua · Revisiona",
+                      detail: "Task board actions clarified; Revisiona opens the archive panel (does not restart). search_knowledge nudge when useful. (IT: Revisiona → pannello archivio, non restart.)"),
+                .init(icon: "creditcard", title: "OpenRouter 402 credits UX",
+                      detail: "Clearer messaging when OpenRouter returns payment/credits errors; safer max_tokens caps. (IT: UX crediti 402 e cap max_tokens.)"),
+                .init(icon: "wrench.and.screwdriver", title: "Editor & i18n fixes",
+                      detail: "Editor reload, unwrap hardening, Tasks board i18n polish."),
+            ]
+        ),
+        Entry(
             id: "1.0.4",
             version: "1.0.4",
             date: "20 Jul 2026",
@@ -528,7 +546,7 @@ enum AppChangelog {
             ]
         ),
         Entry(
-            id: "1.0.5",
+            id: "1.0.5-legacy",
             version: "1.0.5",
             date: "17 lug 2026",
             title: "Token budget & log console",

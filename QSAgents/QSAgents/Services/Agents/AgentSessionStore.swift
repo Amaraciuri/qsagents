@@ -1115,7 +1115,7 @@ final class AgentSessionStore: ObservableObject {
                     if idx == 0 {
                         startTask(tid)
                     } else {
-                        if !tasks!.canStart(tid).ok {
+                        if tasks?.canStart(tid).ok != true {
                             pushActivity(
                                 agentName: "system",
                                 role: "tasks",
@@ -1528,7 +1528,7 @@ final class AgentSessionStore: ObservableObject {
                 )
                 append(
                     existing.id,
-                    "Avvia ignorato — già in corso. Nessun nuovo terminale/agent (evita rilettura).",
+                    "Già in corso — Continua non riavvia. Vedi log sotto (nessun nuovo terminale/agent).",
                     level: .warning
                 )
                 pushActivity(

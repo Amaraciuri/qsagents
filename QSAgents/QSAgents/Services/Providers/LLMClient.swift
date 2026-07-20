@@ -217,10 +217,48 @@ enum LLMClientError: LocalizedError {
         switch self {
         case .noAPIKey: return "Nessuna API key configurata (Integrazioni)"
         case .badURL: return "URL provider non valido"
-        case .http(let c, let b): return "HTTP \(c): \(b.prefix(200))"
+        case .http(let c, let b):
+            let body = String(b.prefix(280))
+            let lower = body.lowercased()
+            switch c {
+            case 402:
+                // OpenRouter: payment required / insufficient credits (often tied to max_tokens).
+                if lower.contains("credit") || lower.contains("afford") || lower.contains("balance")
+                    || lower.contains("payment") || lower.contains("billing") {
+                    return "Crediti insufficienti (HTTP 402). Ricarica su openrouter.ai/settings/credits oppure abbassa max_tokens / usa un modello più economico. \(body)"
+                }
+                return "Pagamento / crediti richiesti (HTTP 402). \(body)"
+            case 401:
+                return "API key non valida o scaduta (HTTP 401). Controlla Integrazioni. \(body)"
+            case 429:
+                return "Rate limit (HTTP 429) — riprova tra poco. \(body)"
+            default:
+                return "HTTP \(c): \(body.prefix(200))"
+            }
         case .decode: return "Risposta LLM non decodificabile"
         case .empty: return "Risposta LLM vuota"
         }
+    }
+
+    /// True when the provider refused due to credits / payment (not a bad key).
+    var isCreditsFailure: Bool {
+        if case .http(let c, let b) = self {
+            if c == 402 { return true }
+            let lower = b.lowercased()
+            return lower.contains("insufficient") && (lower.contains("credit") || lower.contains("balance"))
+        }
+        return false
+    }
+
+    /// OpenRouter sometimes embeds "can only afford N" — use for a cheaper retry.
+    var suggestedMaxTokensCap: Int? {
+        guard case .http(402, let body) = self else { return nil }
+        // e.g. "can only afford 2461"
+        let pattern = #/(?i)afford\s+(\d+)/#
+        if let match = body.firstMatch(of: pattern), let n = Int(match.1), n > 256 {
+            return n
+        }
+        return nil
     }
 }
 

@@ -222,6 +222,7 @@
 "Azzera sessione, totale e stima $" = "Azzera sessione, totale e stima $";
 "backlog progetto" = "backlog progetto";
 "Benvenuto in QS Agents" = "Benvenuto in QS Agents";
+"Bloccata" = "Bloccata";
 "BOARD QS Tasks (questo workspace): VUOTO → DEVI chiamare create_task 3–6 volte ORA." = "BOARD QS Tasks (questo workspace): VUOTO → DEVI chiamare create_task 3–6 volte ORA.";
 "Board sweep GOAL — niente PLAN, riprendo task aperte." = "Board sweep GOAL — niente PLAN, riprendo task aperte.";
 "Bootstrap locale chiude il gate; «completa task» salta PLAN; pulse riparte se tutti idle; deps REVIEW ok." = "Bootstrap locale chiude il gate; «completa task» salta PLAN; pulse riparte se tutti idle; deps REVIEW ok.";
@@ -337,6 +338,8 @@
 "Console agent in Terminali come Swarm; log tool completi; code brain con reindex mtime e hot-path." = "Console agent in Terminali come Swarm; log tool completi; code brain con reindex mtime e hot-path.";
 "Contesto più ricco" = "Contesto più ricco";
 "Continua" = "Continua";
+"Continua lo stesso agent — nessun nuovo terminale se già in corso" = "Continua lo stesso agent — nessun nuovo terminale se già in corso";
+"Continua → log sotto · click card per focus" = "Continua → log sotto · click card per focus";
 "Controlla Git / GitHub Desktop su questo path." = "Controlla Git / GitHub Desktop su questo path.";
 "Coord + scout + builder + reviewer usano lo stesso modello" = "Coord + scout + builder + reviewer usano lo stesso modello";
 "Coord senza key non nasconde i builder LLM: summary spiega routing Swarm." = "Coord senza key non nasconde i builder LLM: summary spiega routing Swarm.";
@@ -450,6 +453,8 @@
 "GitHub Desktop vede le diff" = "GitHub Desktop vede le diff";
 "GitService non disponibile" = "GitService non disponibile";
 "Già completata" = "Già completata";
+"Già in corso — Continua non riavvia. Vedi log sotto (nessun nuovo terminale/agent)." = "Già in corso — Continua non riavvia. Vedi log sotto (nessun nuovo terminale/agent).";
+"Già in corso — vedi log sotto (nessun nuovo terminale)." = "Già in corso — vedi log sotto (nessun nuovo terminale).";
 "Gli agent già avviati restano sul modello con cui sono partiti; le nuove missioni usano questa routing." = "Gli agent già avviati restano sul modello con cui sono partiti; le nuove missioni usano questa routing.";
 "Gli agent leggono in parallelo, patchano con diff e cercano nel repo con ranking." = "Gli agent leggono in parallelo, patchano con diff e cercano nel repo con ranking.";
 "Gli agent useranno l'indice dopo il salvataggio su disco" = "Gli agent useranno l'indice dopo il salvataggio su disco";
@@ -706,7 +711,7 @@
 "Opzionale: scarica un sottoinsieme OpenRouter (non l’intero catalogo)" = "Opzionale: scarica un sottoinsieme OpenRouter (non l’intero catalogo)";
 "Orchestratore" = "Orchestratore";
 "Orchestratore (Chat full)" = "Orchestratore (Chat full)";
-"Orchestratore (chat)" = "Orchestratore (chat)";
+"Orchestratore ha lanciato/ripreso il builder." = "Orchestratore ha lanciato/ripreso il builder.";
 "Orchestratore = layer su Claude PTY" = "Orchestratore = layer su Claude PTY";
 "Orchestratore avvia task" = "Orchestratore avvia task";
 "Orchestratore ha lanciato/ripreso il builder." = "Orchestratore ha lanciato/ripreso il builder.";
@@ -813,6 +818,7 @@
 "REVIEW non riparte da sola" = "REVIEW non riparte da sola";
 "REVIEW non sblocca DAG; progress≠DONE; complete_task flag; clear+stop." = "REVIEW non sblocca DAG; progress≠DONE; complete_task flag; clear+stop.";
 "Review rischi e checklist PR sulle task della missione. No patch. finish con note actionable." = "Review rischi e checklist PR sulle task della missione. No patch. finish con note actionable.";
+"Revisiona" = "Revisiona";
 "Revisione" = "Revisione";
 "Riavvia terminale corrente" = "Riavvia terminale corrente";
 "Ricarica stato" = "Ricarica stato";
@@ -827,6 +833,7 @@
 "Rimuovi" = "Rimuovi";
 "rimuovi task" = "rimuovi task";
 "rimuovi task " = "rimuovi task ";
+"Riprendi il builder sulla task in revisione (stesso agent/PTY se già esiste)" = "Riprendi il builder sulla task in revisione (stesso agent/PTY se già esiste)";
 "riprendi task" = "riprendi task";
 "Rispondi alle domande o avvia i builder" = "Rispondi alle domande o avvia i builder";
 "Risposta GitHub non valida" = "Risposta GitHub non valida";
@@ -901,6 +908,7 @@
 "Solo terminale" = "Solo terminale";
 "Specifica la task: `elimina task <titolo>` o selezionala prima." = "Specifica la task: `elimina task <titolo>` o selezionala prima.";
 "Speech non disponibile" = "Speech non disponibile";
+"Sposta in corso, crea agent builder e log in-app" = "Sposta in corso, crea agent builder e log in-app";
 "Stage" = "Stage";
 "Stage All" = "Stage All";
 "Stage all" = "Stage all";
@@ -1054,3 +1062,11 @@
 "File non leggibile:" = "File non leggibile:";
 "Verifica il path (file, non cartella) o usa list_dir." = "Verifica il path (file, non cartella) o usa list_dir.";
 "Hai già listato questa cartella — non ripetere list_dir sulla root. Usa read_file su un file concreto (package.json, *.css, *.js)." = "Hai già listato questa cartella — non ripetere list_dir sulla root. Usa read_file su un file concreto (package.json, *.css, *.js).";
+"Crediti bassi (402) — ritento con max_tokens" = "Crediti bassi (402) — ritento con max_tokens";
+"Se fallisce: ricarica OpenRouter o scegli un modello più economico." = "Se fallisce: ricarica OpenRouter o scegli un modello più economico.";
+"Stop: crediti OpenRouter insufficienti (HTTP 402). Ricarica su openrouter.ai/settings/credits, abbassa il modello, o riprova — non è un bug di key/rete." = "Stop: crediti OpenRouter insufficienti (HTTP 402). Ricarica su openrouter.ai/settings/credits, abbassa il modello, o riprova — non è un bug di key/rete.";
+"Revisiona sotto: file + Applica feedback (niente riavvio)." = "Revisiona sotto: file + Applica feedback (niente riavvio).";
+"Apri dettaglio e diff sotto — Applica feedback per ritocchi (niente riavvio)" = "Apri dettaglio e diff sotto — Applica feedback per ritocchi (niente riavvio)";
+"✓ Segna completata" = "✓ Segna completata";
+"Sposta in" = "Sposta in";
+"Nessuna task da rimuovere" = "Nessuna task da rimuovere";

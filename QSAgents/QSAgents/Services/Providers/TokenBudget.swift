@@ -12,6 +12,10 @@ enum TokenBudget {
     static let agentBudgetReserve = 3_000
     /// Max completion tokens per agent LLM call — must fit propose_patch JSON (CSS/JS).
     static let agentMaxCompletion = 3_200
+    /// OpenRouter reserves/bills against `max_tokens`; keep lower so low-balance accounts don't 402 on step 1.
+    static let openRouterAgentMaxCompletion = 2_048
+    /// Floor when retrying after HTTP 402 "can only afford N".
+    static let openRouterMinCompletion = 768
     /// Max messages kept in agent history (system + goal + turns).
     /// Higher than early token-economy defaults so id/class/CSS context survives like Cursor.
     static let agentHistoryMessages = 14
@@ -47,9 +51,18 @@ enum TokenBudget {
     static let goalAgentSessionBudget = 48_000
     static let goalAgentBudgetReserve = 4_000
     static let goalAgentMaxCompletion = 4_000
+    static let openRouterGoalAgentMaxCompletion = 2_560
     /// Max auto-splits when a builder stalls (token/max steps/error).
     /// Keep low: each split can spawn 3 agents × ~48k → runaway cost without UI progress.
     static let goalModeMaxSplits = 2
+
+    /// Provider-aware completion cap (OpenRouter 402s when max_tokens > affordable balance).
+    static func agentMaxCompletion(provider: LLMProviderKind, goalMode: Bool) -> Int {
+        if provider == .openRouter {
+            return goalMode ? openRouterGoalAgentMaxCompletion : openRouterAgentMaxCompletion
+        }
+        return goalMode ? goalAgentMaxCompletion : agentMaxCompletion
+    }
 
     static func goalAgentMaxSteps(for role: AgentRole) -> Int {
         switch role {
