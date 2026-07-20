@@ -26,6 +26,8 @@ IDEs give you one agent in a chat pane. **QS Agents** is a **control room**: mul
 
 > Free & MIT. Bring your own API keys (OpenRouter, OpenAI, Anthropic, …). Review every patch agents propose.
 
+![QS Agents home](docs/screenshots/qs-agents-home.png)
+
 ## Install
 
 **Download (recommended):** notarized Developer ID build from GitHub Releases.
