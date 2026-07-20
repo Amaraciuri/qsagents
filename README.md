@@ -32,7 +32,7 @@ IDEs give you one agent in a chat pane. **QS Agents** is a **control room**: mul
 
 **Download (recommended):** notarized Developer ID build from GitHub Releases.
 
-1. Get **[QS-Agents.zip](https://github.com/Amaraciuri/qsagents/releases/download/v1.0.2/QS-Agents.zip)**
+1. Get **[QS-Agents.zip](https://github.com/Amaraciuri/qsagents/releases/download/v1.0.3/QS-Agents.zip)**
 2. Unzip → open **QS Agents.app** (Gatekeeper: *Notarized Developer ID*)
 3. Onboarding → paste provider keys in **Integrations** (Keychain) → open a workspace
 
