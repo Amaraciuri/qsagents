@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>QS Agents</title>
+    <link>https://github.com/Amaraciuri/qsagents</link>
+    <description>Aggiornamenti QS Agents (Developer ID + notarized).</description>
+    <language>it</language>
+    <item>
+      <title>QS Agents 1.0.1</title>
+      <pubDate>Mon, 20 Jul 2026 06:01:52 +0000</pubDate>
+      <sparkle:version>14</sparkle:version>
+      <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[
+        <ul>
+          <li>Sparkle auto-update</li>
+          <li>Production roadmap Fase 0–6 (notarize + resilienza + test)</li>
+        </ul>
+      ]]></description>
+      <enclosure
+        url="https://github.com/Amaraciuri/qsagents/releases/download/v1-alpha/QS-Agents.zip"
+        length="6268323"
+        type="application/octet-stream"
+        sparkle:edSignature="yJXMYa2gJ4qTTyHuCd52/Lf9dMsqOsAPJJqca9saN9A9kmTMJbrFDsbT8VSTHvK6jlxG2KYc1XJrOtFSg7BOBA==" />
+    </item>
+  </channel>
+</rss>

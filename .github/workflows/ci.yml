@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer || true
+      - name: Build & test
+        working-directory: QSAgents
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -scheme QSAgents \
+            -configuration Debug \
+            -destination 'platform=macOS,arch=arm64' \
+            -derivedDataPath build \
+            test
+      - name: Ship smoke (build Release)
+        working-directory: QSAgents
+        run: |
+          xcodebuild \
+            -scheme QSAgents \
+            -configuration Release \
+            -destination 'platform=macOS,arch=arm64' \
+            -derivedDataPath build-release \
+            build

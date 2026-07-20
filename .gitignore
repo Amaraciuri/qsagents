@@ -1,0 +1,62 @@
+# QS Agents monorepo root
+QSAgents/build/
+QSAgents/DerivedData/
+**/xcuserdata/
+*.xcuserstate
+.DS_Store
+**/.DS_Store
+.env
+.env.*
+*.pem
+credentials.json
+
+# Apple signing / distribution (never commit private keys)
+*.p12
+*.mobileprovision
+*.cer
+*.certSigningRequest
+**/Secrets.xcconfig
+**/Local.xcconfig
+**/DeveloperID*.p8
+**/AuthKey_*.p8
+
+# SSH / cloud credentials
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+*.ppk
+.aws/
+.gcp/
+.azure/
+*-credentials.json
+service-account*.json
+**/serviceAccountKey.json
+
+# Package manager auth
+.npmrc
+.netrc
+.yarnrc.yml
+
+# Java keystores
+*.jks
+*.keystore
+
+# Local / personal tooling (not product)
+.vexp/
+.vscode/
+.cursor/
+.idea/
+AGENTS.md
+stitch_*/
+**/stitch_*/
+
+# Sparkle private tools / keys (public SUPublicEDKey stays in Info.plist)
+QSAgents/tools/sparkle/generate_keys
+QSAgents/tools/sparkle/sign_update
+QSAgents/tools/sparkle/generate_appcast
+QSAgents/tools/sparkle/BinaryDelta
+**/*sparkle*private*
+QSAgents/distribution/*.zip
+QSAgents/distribution/*.dmg
+QSAgents/build-hardening/

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>it</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>QS Agents</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>CFBundleDisplayName</key>
+	<string>QS Agents</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2026 QS Agents. All rights reserved.</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<true/>
+	<!-- Local-first app: only HTTPS outbound to LLM providers (system default ATS). -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>QS Agents usa il microfono per il controllo vocale dell'orchestratore e per inviare comandi parlati ai terminali.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>QS Agents trascrive la voce per comandare l'orchestratore e scrivere nei terminali senza tastiera.</string>
+	<!-- Sparkle 2 auto-update (GitHub-hosted appcast). Private EdDSA key lives in Keychain only. -->
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/Amaraciuri/qsagents/main/QSAgents/distribution/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>JksAaRJ7unwhfAFLol2sd5s9EFyJ5v96WsHWRFmeB6Q=</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
+	<key>SUAutomaticallyUpdate</key>
+	<false/>
+</dict>
+</plist>
+

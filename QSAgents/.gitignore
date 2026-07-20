@@ -1,0 +1,59 @@
+# Xcode / derived data (never commit)
+build/
+DerivedData/
+*.xcuserstate
+**/xcuserdata/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# SwiftPM / tooling
+.swiftpm/
+Packages/
+Package.resolved
+xcuserdata/
+
+# Local secrets / env (keys live in Keychain — never commit these)
+.env
+.env.*
+*.pem
+credentials.json
+*.p12
+*.mobileprovision
+*.cer
+Secrets.xcconfig
+Local.xcconfig
+**/AuthKey_*.p8
+**/DeveloperID*.p8
+
+# SSH / cloud
+id_rsa
+id_ed25519
+*.ppk
+.aws/
+.gcp/
+.azure/
+service-account*.json
+
+# Package manager auth
+.npmrc
+.netrc
+
+# Java keystores
+*.jks
+*.keystore
+
+# Crash / local logs if ever copied into tree
+*.log
+
+# Optional filter-repo / backup leftovers
+*.orig
+build-release-*/

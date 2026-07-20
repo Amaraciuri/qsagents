@@ -1,0 +1,3 @@
+/* TCC usage descriptions — English */
+"NSMicrophoneUsageDescription" = "QS Agents uses the microphone for voice control of the orchestrator and to send spoken commands to terminals.";
+"NSSpeechRecognitionUsageDescription" = "QS Agents transcribes speech to command the orchestrator and type into terminals without a keyboard.";

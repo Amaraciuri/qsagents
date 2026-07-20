@@ -1,0 +1,12 @@
+title = "QS Agents gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "False positives and test fixtures"
+paths = [
+  '''\.gitleaks\.toml$''',
+  '''README\.md$''',
+  '''QSAgents/distribution/appcast\.xml$''',
+]
