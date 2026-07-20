@@ -30,7 +30,7 @@ IDEs give you one agent in a chat pane. **QS Agents** is a **control room**: mul
 
 **Download (recommended):** notarized Developer ID build from GitHub Releases.
 
-1. Get **[QS-Agents.zip](https://github.com/Amaraciuri/qsagents/releases/download/v1-alpha/QS-Agents.zip)**
+1. Get **[QS-Agents.zip](https://github.com/Amaraciuri/qsagents/releases/download/v1.0.2/QS-Agents.zip)**
 2. Unzip → open **QS Agents.app** (Gatekeeper: *Notarized Developer ID*)
 3. Onboarding → paste provider keys in **Integrations** (Keychain) → open a workspace
 
@@ -178,7 +178,7 @@ NOTARIZE=1 UPLOAD=1 ./scripts/ship_check.sh
 ditto -c -k --keepParent \
   "build/Build/Products/Release/QS Agents.app" ~/Desktop/QS-Agents.zip
 ./scripts/fetch_sparkle_tools.sh
-./scripts/make_appcast.sh ~/Desktop/QS-Agents.zip 1.0.1 14
+./scripts/make_appcast.sh ~/Desktop/QS-Agents.zip 1.0.2 15
 # commit appcast → push main → GitHub Release asset QS-Agents.zip
 ```
 
@@ -220,4 +220,4 @@ Security-sensitive reports: open a **private** GitHub advisory or email `privacy
 
 ---
 
-*QS Agents 1.0.0 alpha — local-first multi-agent command center for macOS.*
+*QS Agents 1.0.2 — local-first multi-agent command center for macOS.*

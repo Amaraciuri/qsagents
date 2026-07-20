@@ -6,22 +6,23 @@
     <description>Aggiornamenti QS Agents (Developer ID + notarized).</description>
     <language>it</language>
     <item>
-      <title>QS Agents 1.0.1</title>
-      <pubDate>Mon, 20 Jul 2026 06:01:52 +0000</pubDate>
-      <sparkle:version>14</sparkle:version>
-      <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
+      <title>QS Agents 1.0.2</title>
+      <pubDate>Mon, 20 Jul 2026 06:59:09 +0000</pubDate>
+      <sparkle:version>15</sparkle:version>
+      <sparkle:shortVersionString>1.0.2</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
       <description><![CDATA[
         <ul>
-          <li>Sparkle auto-update</li>
-          <li>Production roadmap Fase 0–6 (notarize + resilienza + test)</li>
+          <li>English Language tab + expanded EN/IT i18n</li>
+          <li>OpenRouter Kimi models</li>
+          <li>SpaceX AI grok-4.5 model ID fix + prefs migration</li>
         </ul>
       ]]></description>
       <enclosure
-        url="https://github.com/Amaraciuri/qsagents/releases/download/v1-alpha/QS-Agents.zip"
-        length="6268323"
+        url="https://github.com/Amaraciuri/qsagents/releases/download/v1.0.2/QS-Agents.zip"
+        length="6223556"
         type="application/octet-stream"
-        sparkle:edSignature="yJXMYa2gJ4qTTyHuCd52/Lf9dMsqOsAPJJqca9saN9A9kmTMJbrFDsbT8VSTHvK6jlxG2KYc1XJrOtFSg7BOBA==" />
+        sparkle:edSignature="WwoZtK4Z33wmbgMURNE85/IOIz0TDcTcWpreFCYm6og5zpX/7ab/O1VY23bCOPWgPbT82rZKGRV0jV32JiuXCw==" />
     </item>
   </channel>
 </rss>
