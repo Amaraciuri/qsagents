@@ -1045,3 +1045,12 @@
 "✗ manca (Integrazioni → GitHub)" = "✗ manca (Integrazioni → GitHub)";
 "✦ Invia all'orchestratore" = "✦ Invia all'orchestratore";
 "🧪 Dry-run **ON** — descrivo le azioni senza eseguirle." = "🧪 Dry-run **ON** — descrivo le azioni senza eseguirle.";
+"QS Task collegata sulla board." = "QS Task collegata sulla board.";
+"read_file richiede un file, non una cartella. Usa {\"tool\":\"list_dir\",\"path\":\".\"} oppure un path file (es. package.json, premium-ui.css)." = "read_file richiede un file, non una cartella. Usa {\"tool\":\"list_dir\",\"path\":\".\"} oppure un path file (es. package.json, premium-ui.css).";
+"Path non consentito:" = "Path non consentito:";
+"read_file non legge directory." = "read_file non legge directory.";
+"Usa list_dir, poi read_file su un file concreto (es. package.json)." = "Usa list_dir, poi read_file su un file concreto (es. package.json).";
+"Anteprima list_dir:" = "Anteprima list_dir:";
+"File non leggibile:" = "File non leggibile:";
+"Verifica il path (file, non cartella) o usa list_dir." = "Verifica il path (file, non cartella) o usa list_dir.";
+"Hai già listato questa cartella — non ripetere list_dir sulla root. Usa read_file su un file concreto (package.json, *.css, *.js)." = "Hai già listato questa cartella — non ripetere list_dir sulla root. Usa read_file su un file concreto (package.json, *.css, *.js).";

@@ -137,6 +137,8 @@ final class AgentToolRunner {
     private(set) var pendingPatches: [String: PendingPatch] = [:]
     /// Relative paths successfully written this agent loop (apply_patch / write_file).
     private(set) var appliedPathsThisSession: [String] = []
+    /// Soft anti-loop: last list_dir path this session.
+    private var lastListDirPath: String?
 
     private var maxReadBytes: Int { TokenBudget.toolReadChars }
     private var maxPatchBytes: Int { TokenBudget.toolPatchChars }
@@ -146,6 +148,7 @@ final class AgentToolRunner {
     func resetSessionWriteState() {
         appliedPathsThisSession = []
         pendingPatches.removeAll()
+        lastListDirPath = nil
     }
 
     /// Tools that never mutate disk / board — safe to run in parallel (C4).
@@ -992,7 +995,13 @@ final class AgentToolRunner {
             _ = fm.fileExists(atPath: fp, isDirectory: &isDir)
             lines.append((isDir.boolValue ? "d " : "f ") + n)
         }
-        return AgentToolResult(ok: true, output: lines.joined(separator: "\n") + "\n(\(lines.count) entries in \(full))")
+        var out = lines.joined(separator: "\n") + "\n(\(lines.count) entries in \(full))"
+        let key = (full as NSString).standardizingPath
+        if lastListDirPath == key {
+            out += "\n\n" + L("Hai già listato questa cartella — non ripetere list_dir sulla root. Usa read_file su un file concreto (package.json, *.css, *.js).")
+        }
+        lastListDirPath = key
+        return AgentToolResult(ok: true, output: out)
     }
 
     private func readFile(
@@ -1001,8 +1010,26 @@ final class AgentToolRunner {
         maxLines: Int? = nil,
         around: Int? = nil
     ) -> AgentToolResult {
+        let raw = path.trimmingCharacters(in: .whitespacesAndNewlines)
+        if raw.isEmpty || raw == "." || raw == "./" {
+            return AgentToolResult(
+                ok: false,
+                output: L("read_file richiede un file, non una cartella. Usa {\"tool\":\"list_dir\",\"path\":\".\"} oppure un path file (es. package.json, premium-ui.css).")
+            )
+        }
         guard let full = resolvePath(path) else {
-            return AgentToolResult(ok: false, output: "Path non consentito: \(path)")
+            return AgentToolResult(ok: false, output: L("Path non consentito:") + " \(path)")
+        }
+        var isDir: ObjCBool = false
+        if FileManager.default.fileExists(atPath: full, isDirectory: &isDir), isDir.boolValue {
+            let hint = listDir(path).output
+            let head = hint.split(separator: "\n").prefix(24).joined(separator: "\n")
+            return AgentToolResult(
+                ok: false,
+                output: L("read_file non legge directory.") + " `\(path)` → `\(full)`.\n"
+                    + L("Usa list_dir, poi read_file su un file concreto (es. package.json).")
+                    + "\n\n" + L("Anteprima list_dir:") + "\n\(head)"
+            )
         }
         let root = Self.sanitizedWorkspace(workspaceRoot ?? workspaces?.current?.path)
         let mapped = Self.canonicalSourceRelative(path, workspaceRoot: root)
@@ -1010,7 +1037,11 @@ final class AgentToolRunner {
             // Re-resolve on canonical — resolvePath already remaps, just annotate below
         }
         guard let data = try? Data(contentsOf: URL(fileURLWithPath: full)) else {
-            return AgentToolResult(ok: false, output: "File non leggibile: \(full)")
+            return AgentToolResult(
+                ok: false,
+                output: L("File non leggibile:") + " \(full)\n"
+                    + L("Verifica il path (file, non cartella) o usa list_dir.")
+            )
         }
         let text = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) ?? ""
         if text.isEmpty { return AgentToolResult(ok: true, output: "(vuoto)") }

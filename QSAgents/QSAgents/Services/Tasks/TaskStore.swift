@@ -63,6 +63,62 @@ final class TaskStore: ObservableObject {
         return t
     }
 
+    /// Claude-style: open or reuse a linked QS Task for a goal (no duplicate spam on follow-ups).
+    @discardableResult
+    func ensureLinkedTask(
+        goal: String,
+        workspacePath: String?,
+        titlePrefix: String = "QS",
+        model: String = "orchestrator",
+        evidence: [String] = ["auto-linked"]
+    ) -> AgentTask {
+        let ws = workspacePath.map { ($0 as NSString).standardizingPath }
+        let g = goal.trimmingCharacters(in: .whitespacesAndNewlines)
+        let short = String(g.prefix(48))
+        let prefix = String(short.prefix(20)).lowercased()
+
+        func sameWorkspace(_ t: AgentTask) -> Bool {
+            guard let ws else { return true }
+            guard let wp = t.workspacePath else { return true }
+            return (wp as NSString).standardizingPath == ws
+        }
+
+        // 1) Reuse IN CORSO for this workspace
+        if let existing = tasks.first(where: { $0.column == .inProgress && sameWorkspace($0) }) {
+            appendEvidence(existing.id, "follow-up:\(String(g.prefix(80)))")
+            return existing
+        }
+
+        // 2) Reuse recent TODO/REVIEW auto-seeded or title-similar card
+        if let reopen = tasks.first(where: { t in
+            (t.column == .todo || t.column == .review)
+                && sameWorkspace(t)
+                && (
+                    t.evidence.contains(where: {
+                        $0.hasPrefix("auto-linked") || $0.hasPrefix("system-seed")
+                            || $0.hasPrefix("orchestrator-auto") || $0.contains("supervisor")
+                    })
+                    || (!prefix.isEmpty && t.title.lowercased().contains(prefix))
+                )
+        }) {
+            move(reopen.id, to: .inProgress)
+            appendEvidence(reopen.id, "reopened:\(String(g.prefix(80)))")
+            return reopen
+        }
+
+        let created = add(
+            title: "\(titlePrefix) · \(short)",
+            subtitle: String(g.prefix(400)),
+            column: .inProgress,
+            priority: .alto,
+            model: model,
+            workspacePath: ws,
+            source: .orchestrator,
+            evidence: evidence + (ws.map { ["ws:\($0)"] } ?? [])
+        )
+        return created
+    }
+
     /// Smart plan from repo (A1–A3) + sequential DAG (C1).
     /// Each task depends on the previous one so the plan is executable top→bottom.
     @discardableResult

@@ -330,6 +330,10 @@ final class TerminalManager: ObservableObject {
             if let cwd = selected?.cwd, !cwd.isEmpty { return (cwd as NSString).standardizingPath }
             return (NSHomeDirectory() as NSString).standardizingPath
         }
+        // Strip ACTION:RUN poisoning (`head -40|/Users/…/zackgame`) before allowlist / PTY cwd.
+        if let cleaned = SafetyGuardrails.sanitizeAllowlistPath(p) {
+            p = cleaned
+        }
         p = (p as NSString).expandingTildeInPath
         p = (p as NSString).standardizingPath
         var isDir: ObjCBool = false

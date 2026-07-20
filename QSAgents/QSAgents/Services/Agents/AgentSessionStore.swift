@@ -1956,6 +1956,19 @@ final class AgentSessionStore: ObservableObject {
             )
         }
 
+        // Auto-create / attach QS Task immediately (do not wait for coord create_task).
+        let seeded = seedMissionTasksIfEmpty(reason: useGoal ? "goal-start" : "mission-start")
+        if seeded > 0 {
+            pushActivity(
+                agentName: "system",
+                role: useGoal ? "goal" : "mission",
+                text: "QS Tasks · \(seeded) card collegate (seed all’avvio)",
+                level: .success
+            )
+            // Surface board so the user sees the linked task without asking.
+            orchestrator?.navigateToTasksBoard()
+        }
+
         // 1) Scout (read-only exploration) — no PTY spam
         let scout = spawn(
             name: "scout-1",

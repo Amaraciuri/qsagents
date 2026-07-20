@@ -887,19 +887,21 @@ final class ClaudeSessionSupervisor: ObservableObject {
     // MARK: - Helpers
 
     private func ensureBoardTask(goal: String, workspace: String, terminalID: UUID) -> AgentTask? {
-        if let s = session, let tid = s.taskID, let t = tasks?.task(id: tid) { return t }
-        let short = String(goal.prefix(48))
-        return tasks?.add(
-            title: "Claude Code · \(short)",
-            subtitle: "Supervised PTY · \(String(goal.prefix(200)))",
-            column: .inProgress,
-            priority: .alto,
-            model: "claude-code-cli",
+        if let s = session, let tid = s.taskID, let t = tasks?.task(id: tid) {
+            if t.linkedTerminalID == nil { tasks?.linkTerminal(tid, terminalID: terminalID) }
+            return tasks?.task(id: tid) ?? t
+        }
+        guard let task = tasks?.ensureLinkedTask(
+            goal: goal,
             workspacePath: workspace,
-            linkedTerminalID: terminalID,
-            source: .orchestrator,
+            titlePrefix: "Claude Code",
+            model: "claude-code-cli",
             evidence: ["claude-code-cli", "supervisor", "ws:\(workspace)"]
-        )
+        ) else { return nil }
+        if task.linkedTerminalID != terminalID {
+            tasks?.linkTerminal(task.id, terminalID: terminalID)
+        }
+        return tasks?.task(id: task.id) ?? task
     }
 
     private func terminal(for id: UUID) -> TerminalSession? {

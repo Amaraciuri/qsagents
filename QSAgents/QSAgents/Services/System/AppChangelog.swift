@@ -54,6 +54,22 @@ enum AppChangelog {
     /// Newest first.
     static let releases: [Entry] = [
         Entry(
+            id: "1.0.4",
+            version: "1.0.4",
+            date: "20 Jul 2026",
+            title: "Allowlist fix · Auto task · Kimi resilience",
+            tagline: "Path allowlist parsing, auto QS Task from goals, stronger OpenRouter/Kimi decoding.",
+            kind: .fix,
+            highlights: [
+                .init(icon: "checkmark.shield", title: "Allowlist path fix",
+                      detail: "Parses cmd|path allowlist entries correctly; allowlist can be turned off when needed. (IT: parsing cmd|path e allowlist disattivabile.)"),
+                .init(icon: "checklist", title: "Auto QS Task",
+                      detail: "Orchestrator/mission goals can create and start a QS Task automatically. (IT: goal orchestratore/missione → task automatica.)"),
+                .init(icon: "arrow.clockwise", title: "Kimi / OpenRouter decode",
+                      detail: "More resilient LLM JSON decode + retry for OpenRouter/Kimi responses. (IT: decode JSON più robusto con retry.)"),
+            ]
+        ),
+        Entry(
             id: "1.0.3",
             version: "1.0.3",
             date: "20 Jul 2026",
@@ -528,7 +544,7 @@ enum AppChangelog {
             ]
         ),
         Entry(
-            id: "1.0.4",
+            id: "1.0.4-legacy",
             version: "1.0.4",
             date: "17 lug 2026",
             title: "Parallel tools, diff-first & FTS",

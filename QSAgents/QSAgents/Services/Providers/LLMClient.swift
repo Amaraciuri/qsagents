@@ -627,25 +627,141 @@ final class LLMClient {
 
         let (respData, _) = try await dataWithRetry(for: req, label: provider.rawValue)
 
-        guard let json = try JSONSerialization.jsonObject(with: respData) as? [String: Any],
-              let choices = json["choices"] as? [[String: Any]],
-              let msg = choices.first?["message"] as? [String: Any],
-              let content = msg["content"] as? String else {
-            throw LLMClientError.decode
+        // Harden for OpenRouter/Kimi: content arrays, tool_calls, null content, etc.
+        if let completion = Self.parseOpenAICompatCompletion(
+            data: respData, provider: provider, model: model
+        ) {
+            return completion
         }
+        let snippet = String(data: respData.prefix(480), encoding: .utf8)?
+            .replacingOccurrences(of: "\n", with: " ") ?? "<binary \(respData.count)b>"
+        AppLogger.warn("LLM \(provider.rawValue) undecodable — retry once: \(snippet)")
+        try await Task.sleep(nanoseconds: 450_000_000)
+        let (retryData, _) = try await dataWithRetry(for: req, label: provider.rawValue + "-decode-retry")
+        if let completion = Self.parseOpenAICompatCompletion(
+            data: retryData, provider: provider, model: model
+        ) {
+            return completion
+        }
+        let snippet2 = String(data: retryData.prefix(320), encoding: .utf8)?
+            .replacingOccurrences(of: "\n", with: " ") ?? "<binary>"
+        AppLogger.warn("LLM \(provider.rawValue) still undecodable: \(snippet2)")
+        throw LLMClientError.decode
+    }
 
+    private static func parseOpenAICompatCompletion(
+        data: Data,
+        provider: LLMProviderKind,
+        model: String
+    ) -> LLMCompletion? {
+        guard let text = extractOpenAICompatText(from: data)?
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+              !text.isEmpty else { return nil }
         var usage = LLMUsage.zero
-        if let u = json["usage"] as? [String: Any] {
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let u = json["usage"] as? [String: Any] {
             usage = LLMUsage(
                 promptTokens: u["prompt_tokens"] as? Int ?? 0,
                 completionTokens: u["completion_tokens"] as? Int ?? 0,
                 totalTokens: u["total_tokens"] as? Int ?? 0
             )
         }
-
-        let text = content.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { throw LLMClientError.empty }
         return LLMCompletion(text: text, provider: provider, model: model, usage: usage)
+    }
+
+    /// Extract assistant text from OpenAI-compatible chat JSON (Kimi/OpenRouter variants).
+    static func extractOpenAICompatText(from data: Data) -> String? {
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            // Sometimes providers wrap JSON in markdown fences — unwrap once, no recurse loop.
+            guard let s = String(data: data, encoding: .utf8) else { return nil }
+            let unwrapped = unwrapMarkdownFence(s)
+            guard unwrapped != s.trimmingCharacters(in: .whitespacesAndNewlines),
+                  let again = unwrapped.data(using: .utf8),
+                  let nested = try? JSONSerialization.jsonObject(with: again) as? [String: Any] else {
+                return nil
+            }
+            return extractOpenAICompatText(fromJSON: nested)
+        }
+        return extractOpenAICompatText(fromJSON: json)
+    }
+
+    private static func extractOpenAICompatText(fromJSON json: [String: Any]) -> String? {
+        if let err = json["error"] as? [String: Any] {
+            let msg = (err["message"] as? String) ?? "\(err)"
+            AppLogger.warn("LLM API error payload: \(msg.prefix(200))")
+            return nil
+        }
+        guard let choices = json["choices"] as? [[String: Any]], let first = choices.first else {
+            if let t = json["output_text"] as? String, !t.isEmpty { return t }
+            return nil
+        }
+        let msg = first["message"] as? [String: Any]
+        // 1) string content
+        if let content = msg?["content"] as? String, !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return content
+        }
+        // 2) content as array of parts (OpenRouter / multimodal / Kimi)
+        if let parts = msg?["content"] as? [[String: Any]] {
+            let texts = parts.compactMap { part -> String? in
+                if let t = part["text"] as? String { return t }
+                if let t = part["content"] as? String { return t }
+                if let t = part["output_text"] as? String { return t }
+                return nil
+            }
+            let joined = texts.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+            if !joined.isEmpty { return joined }
+        }
+        // 3) Native tool_calls → synthesize JSON our AgentToolRunner understands
+        if let toolCalls = msg?["tool_calls"] as? [[String: Any]], !toolCalls.isEmpty {
+            let synthesized = synthesizeToolJSON(from: toolCalls)
+            if !synthesized.isEmpty { return synthesized }
+        }
+        // 4) reasoning / reasoning_content (some Kimi builds put answer there)
+        for key in ["reasoning_content", "reasoning", "refusal"] {
+            if let t = msg?[key] as? String, !t.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                return t
+            }
+        }
+        // 5) Legacy / alternate shapes
+        if let t = first["text"] as? String, !t.isEmpty { return t }
+        if let t = msg?["text"] as? String, !t.isEmpty { return t }
+        if let t = json["output_text"] as? String, !t.isEmpty { return t }
+        return nil
+    }
+
+    private static func unwrapMarkdownFence(_ raw: String) -> String {
+        var s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard s.hasPrefix("```") else { return s }
+        s = s.replacingOccurrences(of: #"^```(?:json)?\s*"#, with: "", options: .regularExpression)
+        if let end = s.range(of: "```") {
+            s = String(s[..<end.lowerBound])
+        }
+        return s.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Map OpenAI tool_calls → one or more `{"tool":…}` lines for parseToolCalls.
+    private static func synthesizeToolJSON(from toolCalls: [[String: Any]]) -> String {
+        var lines: [String] = []
+        for call in toolCalls {
+            let fn = call["function"] as? [String: Any]
+            let name = (fn?["name"] as? String) ?? (call["name"] as? String) ?? ""
+            guard !name.isEmpty else { continue }
+            var argsObj: [String: Any] = ["tool": name]
+            if let argsStr = fn?["arguments"] as? String,
+               let argsData = argsStr.data(using: .utf8),
+               let parsed = try? JSONSerialization.jsonObject(with: argsData) as? [String: Any] {
+                for (k, v) in parsed { argsObj[k] = v }
+            } else if let args = fn?["arguments"] as? [String: Any] {
+                for (k, v) in args { argsObj[k] = v }
+            } else if let args = call["arguments"] as? [String: Any] {
+                for (k, v) in args { argsObj[k] = v }
+            }
+            if let data = try? JSONSerialization.data(withJSONObject: argsObj),
+               let s = String(data: data, encoding: .utf8) {
+                lines.append(s)
+            }
+        }
+        return lines.joined(separator: "\n")
     }
 
     /// SSE stream for OpenAI-compatible chat completions.

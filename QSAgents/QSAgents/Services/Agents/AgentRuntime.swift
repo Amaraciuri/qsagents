@@ -570,11 +570,13 @@ final class AgentRuntime {
                         """))
                     continue
                 }
-                // Transient empty / network: retry without dropping into shell bootstrap
+                // Transient empty / network / undecodable: retry without dropping into shell bootstrap
                 let retryable = lower.contains("vuota") || lower.contains("empty")
                     || lower.contains("timeout") || lower.contains("temporar")
                     || lower.contains("rate") || lower.contains("529")
                     || lower.contains("overloaded") || lower.contains("503")
+                    || lower.contains("non decodificabile") || lower.contains("undecodable")
+                    || lower.contains("decodificabile")
                 if retryable, emptyRetries < 2, !shouldStop(sessionId) {
                     emptyRetries += 1
                     store?.append(sessionId, "Errore transient — retry \(emptyRetries)/2 (resto in LLM)…", level: .warning)
@@ -583,7 +585,8 @@ final class AgentRuntime {
                     }
                     history.append(LLMMessage(role: .user, content: """
                         Errore API: \(errMsg). Continua la task con un JSON tool.
-                        Preferisci: {"tool":"propose_patch","path":"premium-ui.css","content":"…"}
+                        Preferisci: {"tool":"read_file","path":"package.json"} oppure propose_patch.
+                        Mai read_file path="." (è una cartella — usa list_dir).
                         """))
                     continue
                 }

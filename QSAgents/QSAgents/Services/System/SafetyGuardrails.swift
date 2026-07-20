@@ -135,7 +135,8 @@ struct ProjectAllowlistEntry: Identifiable, Equatable, Codable, Hashable {
 
     init(id: UUID = UUID(), path: String, name: String? = nil) {
         self.id = id
-        let resolved = (path as NSString).standardizingPath
+        let expanded = (path as NSString).expandingTildeInPath
+        let resolved = WorkspacePathSandbox.realStandardizedPath(expanded)
         self.path = resolved
         self.name = name ?? URL(fileURLWithPath: resolved).lastPathComponent
     }
@@ -460,9 +461,11 @@ final class SafetyGuardrails: ObservableObject {
         var worst: SafetyDecision = .allow
         let role = context.role
 
-        // 1) Project allowlist (path)
-        if let path = context.path, allowlistMode != .off {
-            if !isPathAllowed(path) {
+        // 1) Project allowlist (path) — OFF never blocks/warns.
+        // Sanitize ACTION:RUN leftovers like `head -40|/Users/.../zackgame` before matching.
+        if allowlistMode != .off, let rawPath = context.path {
+            let path = Self.sanitizeAllowlistPath(rawPath) ?? rawPath
+            if Self.looksLikeFilesystemPath(path), !isPathAllowed(path) {
                 let synthetic = GuardrailRule(
                     name: "Project allowlist",
                     category: .allowlist,
@@ -640,11 +643,53 @@ final class SafetyGuardrails: ObservableObject {
     }
 
     func isPathAllowed(_ path: String) -> Bool {
-        if projectAllowlist.isEmpty { return allowlistMode == .off }
-        let resolved = (path as NSString).standardizingPath
-        return projectAllowlist.contains { entry in
-            resolved == entry.path || resolved.hasPrefix(entry.path + "/")
+        // Spenta → always allow (even with a non-empty list).
+        if allowlistMode == .off { return true }
+        if projectAllowlist.isEmpty { return false }
+        guard let cleaned = Self.sanitizeAllowlistPath(path) ?? (Self.looksLikeFilesystemPath(path) ? path : nil) else {
+            // Not a real path (e.g. poisoned `cmd|path`) — do not block on garbage.
+            return true
         }
+        let resolved = WorkspacePathSandbox.realStandardizedPath(cleaned)
+        return projectAllowlist.contains { entry in
+            let entryReal = WorkspacePathSandbox.realStandardizedPath(entry.path)
+            return resolved == entryReal || resolved.hasPrefix(entryReal + "/")
+        }
+    }
+
+    /// True for absolute / tilde filesystem paths (not shell fragments).
+    static func looksLikeFilesystemPath(_ raw: String) -> Bool {
+        let s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if s.isEmpty { return false }
+        if s.contains("|") { return false }
+        if s.hasPrefix("/") || s.hasPrefix("~/") || s == "~" { return true }
+        return false
+    }
+
+    /// Extract a real cwd from poisoned strings like `head -40|/Users/…/zackgame` or `ls | head -40|/tmp/proj`.
+    static func sanitizeAllowlistPath(_ raw: String) -> String? {
+        var s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !s.isEmpty else { return nil }
+        if s.contains("|") {
+            let parts = s.split(separator: "|", omittingEmptySubsequences: false)
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            if let hit = parts.last(where: { looksLikeFilesystemPath($0) }) {
+                s = hit
+            } else {
+                return nil
+            }
+        }
+        // `head -40 /Users/…` → take the absolute path token
+        if !looksLikeFilesystemPath(s) {
+            let pattern = #/(?:^|\s)(~\/|\/)[^\s`'",]+/#
+            if let match = s.firstMatch(of: pattern) {
+                s = String(match.0).trimmingCharacters(in: .whitespaces)
+            } else {
+                return nil
+            }
+        }
+        let expanded = (s as NSString).expandingTildeInPath
+        return (expanded as NSString).standardizingPath
     }
 
     func addAllowlistPath(_ path: String, name: String? = nil) {

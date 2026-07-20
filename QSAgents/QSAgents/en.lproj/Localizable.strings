@@ -1045,3 +1045,12 @@
 "✗ manca (Integrazioni → GitHub)" = "✗ manca (Integrations → GitHub)";
 "✦ Invia all'orchestratore" = "✦ Send to orchestrator";
 "🧪 Dry-run **ON** — descrivo le azioni senza eseguirle." = "🧪 Dry-run **ON** — descrivo the azioni without eseguirle.";
+"QS Task collegata sulla board." = "QS Task linked on the board.";
+"read_file richiede un file, non una cartella. Usa {\"tool\":\"list_dir\",\"path\":\".\"} oppure un path file (es. package.json, premium-ui.css)." = "read_file requires a file, not a folder. Use {\"tool\":\"list_dir\",\"path\":\".\"} or a file path (e.g. package.json, premium-ui.css).";
+"Path non consentito:" = "Path not allowed:";
+"read_file non legge directory." = "read_file does not read directories.";
+"Usa list_dir, poi read_file su un file concreto (es. package.json)." = "Use list_dir, then read_file on a concrete file (e.g. package.json).";
+"Anteprima list_dir:" = "list_dir preview:";
+"File non leggibile:" = "File not readable:";
+"Verifica il path (file, non cartella) o usa list_dir." = "Check the path (file, not folder) or use list_dir.";
+"Hai già listato questa cartella — non ripetere list_dir sulla root. Usa read_file su un file concreto (package.json, *.css, *.js)." = "You already listed this folder — do not list_dir the root again. Use read_file on a concrete file (package.json, *.css, *.js).";

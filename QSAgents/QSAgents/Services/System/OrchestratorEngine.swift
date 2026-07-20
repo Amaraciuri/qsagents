@@ -446,6 +446,11 @@ final class OrchestratorEngine: ObservableObject {
         onNavigate?(route)
     }
 
+    /// Public: surface QS Tasks after auto-seed (mission/goal start).
+    func navigateToTasksBoard() {
+        navigate("tasks", force: true)
+    }
+
     init() {
         messages = [Self.makeWelcomeMessage()]
     }
@@ -860,7 +865,9 @@ final class OrchestratorEngine: ObservableObject {
                 ProviderPreferences.shared.syncSwarmFromLive(provider: p, model: m)
             }
             pushActivity(.goal, autoMission && !goalModeEnabled ? "Missione Swarm…" : "Avvio missione Swarm…")
+            // startGoalMode / direct-patch seed QS Task themselves — avoid duplicate cards.
             agents?.startGoalMode(goal: text, builders: 2)
+            navigate("tasks", force: true)
             navigate("swarm")
             let reply = ChatMessage(
                 role: .assistant,
@@ -870,6 +877,7 @@ final class OrchestratorEngine: ObservableObject {
                 Goal: \(text)
 
                 · Workspace: \(workspaces?.current?.path ?? "?")
+                · QS Task collegata sulla board
                 · Per IDE singolo-PTY: scegli **Auto** o **QS API** nel menu Coding
                 · Log in **QS Swarm** · Di’ «stop goal» per fermare
                 """,
@@ -1137,6 +1145,19 @@ final class OrchestratorEngine: ObservableObject {
             lastClaudeCodeTerminalID = result.terminalID
             lastClaudeCodeTaskID = result.taskID
             if !ws.isEmpty { git?.setPath(ws) }
+            // If engine returned without a board task (rare), open/create one like Claude.
+            if result.taskID == nil {
+                let linked = ensureLinkedQSTask(goal: goal, navigateToBoard: false)
+                if let tid = linked?.id {
+                    return CodingEngineLaunchResult(
+                        ok: result.ok,
+                        message: result.message + "\n\n" + L("QS Task collegata sulla board."),
+                        engine: result.engine,
+                        terminalID: result.terminalID,
+                        taskID: tid
+                    )
+                }
+            }
         }
         // Clarify: Claude CLI ignores Home model picker (Haiku/Opus API ids).
         if result.engine == .claudeCLI {
@@ -1870,6 +1891,16 @@ final class OrchestratorEngine: ObservableObject {
                     acts2.append(.startBoardTask(titleOrId: ref))
                 }
             }
+            // New goal/mission via LLM without create_task → auto-link QS Task (Kimi/Claude parity).
+            let hasTaskAction = acts2.contains {
+                if case .createTask = $0 { return true }
+                if case .startMission = $0 { return true }
+                if case .startBoardTask = $0 { return true }
+                return false
+            }
+            if !hasTaskAction, looksLikeAutonomousWork(text) || matches(lower, any: ["missione", "goal mode", "avvia missione"]) {
+                _ = ensureLinkedQSTask(goal: text, navigateToBoard: true)
+            }
             let body = clean.isEmpty ? llmResult.text : clean
             let tail = acts2.isEmpty
                 ? ""
@@ -2092,7 +2123,13 @@ final class OrchestratorEngine: ObservableObject {
                     ProviderPreferences.shared.syncSwarmFromLive(provider: p, model: m)
                 }
                 agents?.goalModePreferred = true
+                // startMission seeds the board; only ensure if seed somehow skipped.
                 let r = tools.execute(.startMission(goal: goal, builders: 2))
+                if agents?.mission?.taskIds.isEmpty != false {
+                    _ = ensureLinkedQSTask(goal: goal, navigateToBoard: true)
+                } else {
+                    navigate("tasks", force: true)
+                }
                 navigate("swarm")
                 messages.append(ChatMessage(
                     role: .assistant,
@@ -2865,14 +2902,12 @@ final class OrchestratorEngine: ObservableObject {
                     actions.append(.openTerminal(path: (path as NSString).expandingTildeInPath, title: nil))
                 }
             } else if line.hasPrefix("ACTION:RUN|") {
+                // Path is optional and must look like a filesystem path. Shell pipelines use `|`
+                // inside cmd — never take the first `|` as the cmd/path split (that produced
+                // allowlist Path: `head -40|/Users/.../zackgame`).
                 let rest = String(line.dropFirst("ACTION:RUN|".count))
-                let parts = rest.split(separator: "|", maxSplits: 1).map(String.init)
-                if let cmd = parts.first?.trimmingCharacters(in: .whitespaces), !cmd.isEmpty {
-                    var runPath: String? = parts.count > 1 ? parts[1].trimmingCharacters(in: .whitespaces) : nil
-                    if runPath?.isEmpty == true { runPath = nil }
-                    if let p = runPath {
-                        runPath = (p as NSString).expandingTildeInPath
-                    }
+                let (cmd, runPath) = Self.parseRunActionRest(rest)
+                if !cmd.isEmpty {
                     actions.append(.runCommand(command: cmd, path: runPath))
                 }
             } else if line.hasPrefix("ACTION:START_MISSION|") || line.hasPrefix("ACTION:GOAL|") {
@@ -2903,5 +2938,41 @@ final class OrchestratorEngine: ObservableObject {
             }
         }
         return (lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines), actions)
+    }
+
+    /// Parse `ACTION:RUN|…` body. Last `|`-segment wins as cwd only if it looks like a path.
+    static func parseRunActionRest(_ rest: String) -> (command: String, path: String?) {
+        let trimmed = rest.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return ("", nil) }
+        let segments = trimmed
+            .split(separator: "|", omittingEmptySubsequences: false)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        if segments.count >= 2, let last = segments.last, SafetyGuardrails.looksLikeFilesystemPath(last) {
+            let cmd = segments.dropLast().joined(separator: "|").trimmingCharacters(in: .whitespacesAndNewlines)
+            let path = (last as NSString).expandingTildeInPath
+            return (cmd, path.isEmpty ? nil : path)
+        }
+        return (trimmed, nil)
+    }
+
+    /// Ensure a QS Task exists for a new goal/mission (Claude-style), reuse active card on follow-ups.
+    @discardableResult
+    func ensureLinkedQSTask(goal: String, navigateToBoard: Bool = true) -> AgentTask? {
+        let ws = workspaces?.current?.path
+        let model = selectedModel?.isEmpty == false
+            ? selectedModel!
+            : (selectedProviderKind ?? ProviderPreferences.shared.anyKeyedProvider())?.defaultModel ?? "orchestrator"
+        let task = tasks?.ensureLinkedTask(
+            goal: goal,
+            workspacePath: ws,
+            titlePrefix: "QS",
+            model: model,
+            evidence: ["orchestrator-auto", "ws:\(ws ?? "?")"]
+        )
+        if let task {
+            lastClaudeCodeTaskID = task.id
+            if navigateToBoard { navigate("tasks") }
+        }
+        return task
     }
 }
