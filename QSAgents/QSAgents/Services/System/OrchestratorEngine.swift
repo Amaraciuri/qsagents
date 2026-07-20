@@ -80,6 +80,7 @@ enum OrchestratorPhase: String, Equatable {
     case goal
     case done
 
+    /// Italian source key — pass through `L()` at display time.
     var label: String {
         switch self {
         case .idle: return "Inattivo"
@@ -199,7 +200,7 @@ final class OrchestratorEngine: ObservableObject {
         lastActions = []
         lastLLMError = nil
         livePhase = .idle
-        liveDetail = stopAgents ? "Chat pulita · agent fermati" : ""
+        liveDetail = stopAgents ? L("Chat pulita · agent fermati") : ""
         isThinking = false
 
         if stopAgents {
@@ -210,6 +211,7 @@ final class OrchestratorEngine: ObservableObject {
         }
 
         _ = ChatHistoryStore.shared.saveLive(workspacePath: ws, messages: [])
+        messages = [Self.makeWelcomeMessage()]
     }
 
     /// Restore a saved / archived transcript into the live chat.
@@ -218,7 +220,7 @@ final class OrchestratorEngine: ObservableObject {
         messages = t.messages.map { $0.asChatMessage() }
         activityLog.removeAll(keepingCapacity: false)
         livePhase = .idle
-        liveDetail = "History ripristinata · \(t.title)"
+        liveDetail = L("History ripristinata") + " · \(t.title)"
     }
 
     /// Load live transcript for a workspace (call on bind / workspace switch).
@@ -227,14 +229,14 @@ final class OrchestratorEngine: ObservableObject {
             _ = ChatHistoryStore.shared.saveLive(workspacePath: prev, messages: messages)
         }
         guard let path, !path.isEmpty else {
-            messages = []
+            messages = [Self.makeWelcomeMessage()]
             return
         }
         if let t = ChatHistoryStore.shared.activeTranscript(for: path), !t.messages.isEmpty {
             messages = t.messages.map { $0.asChatMessage() }
         } else {
-            messages = []
-            _ = ChatHistoryStore.shared.saveLive(workspacePath: path, messages: [])
+            messages = [Self.makeWelcomeMessage()]
+            _ = ChatHistoryStore.shared.saveLive(workspacePath: path, messages: messages)
         }
         activityLog.removeAll(keepingCapacity: false)
         livePhase = .idle
@@ -445,28 +447,70 @@ final class OrchestratorEngine: ObservableObject {
     }
 
     init() {
-        messages = [
-            ChatMessage(
-                role: .assistant,
-                text: """
-                Ciao — sono l'**Orchestratore QS**.
+        messages = [Self.makeWelcomeMessage()]
+    }
 
-                **AI attuale:** \(Self.describeConfiguredAI())
-                **Coding engine:** \(CodingEngine.preferred.menuLabel) · \(CodingEngine.availabilitySummary())
+    /// Language-aware welcome bubble shown on first open / after clear.
+    static func makeWelcomeMessage() -> ChatMessage {
+        let ai = Self.describeConfiguredAI()
+        let engineLabel = CodingEngine.preferred.menuLabel
+        let avail = CodingEngine.availabilitySummary()
+        let en = AppLanguageStore.shared.isEnglish
+        let text: String
+        if en {
+            text = """
+            Hi — I'm the **QS Orchestrator**.
 
-                Sono un **layer** sopra il coding engine (un PTY, ascolto, task, chat → stessa sessione):
-                • **Auto** — Claude CLI → Grok CLI → QS API IDE (tools + modello OpenRouter)
-                • **QS API** — IDE nel terminale senza CLI esterni
-                • **Swarm** — solo se lo scegli esplicitamente o «avvia missione …»
+            **Current AI:** \(ai)
+            **Coding engine:** \(engineLabel) · \(avail)
 
-                Prova:
-                `Nella home migliora il PLAY…` → continua a scrivere qui (stesso PTY/loop)
-                `apri coding engine qui` · «stop goal»
-                Oppure tieni premuto 🎤 e parla.
-                """,
-                engine: .localRules
-            )
-        ]
+            I'm a **layer** on top of the coding engine (one PTY, listening, tasks, chat → same session):
+            • **Auto** — Claude CLI → Grok CLI → QS API IDE (tools + OpenRouter model)
+            • **QS API** — IDE in the terminal without external CLIs
+            • **Swarm** — only if you choose it explicitly or say «start mission …»
+
+            Try:
+            `In Home, improve the PLAY…` → keep writing here (same PTY/loop)
+            `open coding engine here` · «stop goal»
+            Or hold 🎤 and speak.
+            """
+        } else {
+            text = """
+            Ciao — sono l'**Orchestratore QS**.
+
+            **AI attuale:** \(ai)
+            **Coding engine:** \(engineLabel) · \(avail)
+
+            Sono un **layer** sopra il coding engine (un PTY, ascolto, task, chat → stessa sessione):
+            • **Auto** — Claude CLI → Grok CLI → QS API IDE (tools + modello OpenRouter)
+            • **QS API** — IDE nel terminale senza CLI esterni
+            • **Swarm** — solo se lo scegli esplicitamente o «avvia missione …»
+
+            Prova:
+            `Nella home migliora il PLAY…` → continua a scrivere qui (stesso PTY/loop)
+            `apri coding engine qui` · «stop goal»
+            Oppure tieni premuto 🎤 e parla.
+            """
+        }
+        return ChatMessage(role: .assistant, text: text, engine: .localRules)
+    }
+
+    /// Marker used to detect the seeded welcome so language switches can refresh it.
+    static var welcomeMarkerIT: String { "Ciao — sono l'" }
+    static var welcomeMarkerEN: String { "Hi — I'm the" }
+
+    /// Refresh welcome when language changes and chat is still only the initial bubble (or empty).
+    func refreshWelcomeForLanguageIfNeeded() {
+        if messages.isEmpty {
+            messages = [Self.makeWelcomeMessage()]
+            return
+        }
+        guard messages.count == 1, messages[0].role == .assistant else { return }
+        let t = messages[0].text
+        let isWelcome = t.contains(Self.welcomeMarkerIT) || t.contains(Self.welcomeMarkerEN)
+            || t.contains("Orchestratore QS") || t.contains("QS Orchestrator")
+        guard isWelcome else { return }
+        messages = [Self.makeWelcomeMessage()]
     }
 
     /// Quale backend è configurato adesso (Keychain + override live).
@@ -491,13 +535,20 @@ final class OrchestratorEngine: ObservableObject {
 
     func setLiveProvider(_ p: LLMProviderKind) {
         selectedProviderRaw = p.rawValue
-        if selectedModel == nil || !(ProviderPreferences.shared.models(for: p).contains(selectedModel ?? "")) {
+        let current = selectedModel.map { p.canonicalizeModelID($0) }
+        if current == nil || !(ProviderPreferences.shared.models(for: p).contains(current ?? "")) {
             selectedModel = p.defaultModel
+        } else {
+            selectedModel = current
         }
     }
 
     func setLiveModel(_ model: String) {
-        selectedModel = model
+        if let p = selectedProviderKind {
+            selectedModel = p.canonicalizeModelID(model)
+        } else {
+            selectedModel = model
+        }
     }
 
     func bind(
@@ -582,7 +633,9 @@ final class OrchestratorEngine: ObservableObject {
     }
 
     func pushActivity(_ phase: OrchestratorPhase, _ detail: String = "") {
-        let d = detail.trimmingCharacters(in: .whitespacesAndNewlines)
+        let raw = detail.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Translate static Italian process labels; interpolated strings pass through unchanged.
+        let d = raw.isEmpty ? "" : L(raw)
         // Ignore Claude TUI footer spam
         if d.contains("auto mode on") || d.contains("shift+tab to cycle") { return }
         // Dedupe identical busy steps (was flooding «Attendo terminale» ×10)
@@ -763,7 +816,7 @@ final class OrchestratorEngine: ObservableObject {
             memory.remember(role: "assistant", text: reply.text)
             lastReplyEngine = .localRules
             livePhase = .waitingTerminal
-            liveDetail = "Attendo risposta Claude → chat"
+            liveDetail = L("Attendo risposta Claude → chat")
             // Stay on chat so the relayed answer is visible (user can still open Terminali)
             finishActivityTurn(successDetail: result.ok ? "follow-up coding" : "follow-up failed")
             isThinking = false
@@ -828,7 +881,7 @@ final class OrchestratorEngine: ObservableObject {
             pushActivity(.waitingAgents, "Swarm builders avviati")
             isThinking = false
             livePhase = .waitingAgents
-            liveDetail = "Missione Swarm in corso…"
+            liveDetail = L("Missione Swarm in corso…")
             return
         }
 
@@ -1033,7 +1086,7 @@ final class OrchestratorEngine: ObservableObject {
         ))
         pushActivity(.waitingAgents, "Builder in esecuzione sotto controllo orchestratore")
         livePhase = .waitingAgents
-        liveDetail = "Missione in esecuzione"
+        liveDetail = L("Missione in esecuzione")
         isThinking = false
         navigate("swarm")
     }
@@ -2268,7 +2321,7 @@ final class OrchestratorEngine: ObservableObject {
             } else if lowAll.contains("gpt-4") {
                 model = "gpt-4.1"
             } else if lowAll.contains("grok") {
-                model = "grok-4"
+                model = "grok-4.5"
             }
         }
         return (finalTitle, sub.isEmpty ? nil : sub, priority, model)

@@ -68,10 +68,10 @@ struct DashboardView: View {
             Spacer()
 
             VStack(spacing: 2) {
-                SidebarNavRow(title: "Terminale", icon: "terminal", selected: true) {
+                SidebarNavRow(title: L("Terminale"), icon: "terminal", selected: true) {
                     state.mainTab = .dashboard
                 }
-                SidebarNavRow(title: "Impostazioni", icon: "gearshape", selected: false) {
+                SidebarNavRow(title: L("Impostazioni"), icon: "gearshape", selected: false) {
                     state.openIntegrations()
                 }
             }

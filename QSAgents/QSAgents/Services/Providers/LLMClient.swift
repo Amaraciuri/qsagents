@@ -79,11 +79,32 @@ enum LLMProviderKind: String, CaseIterable, Identifiable {
 
     var defaultModel: String {
         switch self {
-        case .spaceXAI: return "grok-4-5"
+        case .spaceXAI: return "grok-4.5"
         case .openAI: return "gpt-4.1"
         case .anthropic: return "claude-sonnet-5"
         case .gemini: return "gemini-2.5-pro"
         case .openRouter: return "openai/gpt-4.1"
+        }
+    }
+
+    /// Map legacy / Cursor-internal slugs to current provider API model IDs.
+    func canonicalizeModelID(_ model: String) -> String {
+        let m = model.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !m.isEmpty else { return defaultModel }
+        switch self {
+        case .spaceXAI:
+            // xAI API uses dotted IDs (docs.x.ai). Hyphenated `grok-4-5` is invalid.
+            switch m {
+            case "grok-4-5", "cursor-grok-4.5", "cursor-grok-4-5",
+                 "grok-4-5-thinking-high", "cursor-grok-4.5-high-fast":
+                return "grok-4.5"
+            case "grok-4-3", "grok-4-3-latest":
+                return "grok-4.3"
+            default:
+                return m
+            }
+        default:
+            return m
         }
     }
 
@@ -92,11 +113,11 @@ enum LLMProviderKind: String, CaseIterable, Identifiable {
         switch self {
         case .spaceXAI:
             return [
-                "grok-4-5",
-                "grok-4",
-                "grok-3",
-                "grok-3-mini",
-                "grok-2-latest",
+                "grok-4.5",
+                "grok-4.3",
+                "grok-4.20-0309-reasoning",
+                "grok-4.20-0309-non-reasoning",
+                "grok-build-0.1",
             ]
         case .openAI:
             return [
@@ -347,10 +368,10 @@ final class LLMClient {
         // Prefer explicit model → prefs coordinator model if same provider → provider default
         let m: String
         if let model, !model.isEmpty {
-            m = model
+            m = p.canonicalizeModelID(model)
         } else {
             let pref = ProviderPreferences.shared.model(for: .coordinator)
-            m = (pref != "local" && !pref.isEmpty) ? pref : p.defaultModel
+            m = (pref != "local" && !pref.isEmpty) ? p.canonicalizeModelID(pref) : p.defaultModel
         }
 
         switch p.apiStyle {
@@ -405,10 +426,10 @@ final class LLMClient {
         guard let key = resolveKey(p) else { throw LLMClientError.noAPIKey }
         let m: String
         if let model, !model.isEmpty {
-            m = model
+            m = p.canonicalizeModelID(model)
         } else {
             let pref = ProviderPreferences.shared.model(for: .coordinator)
-            m = (pref != "local" && !pref.isEmpty) ? pref : p.defaultModel
+            m = (pref != "local" && !pref.isEmpty) ? p.canonicalizeModelID(pref) : p.defaultModel
         }
 
         switch p.apiStyle {

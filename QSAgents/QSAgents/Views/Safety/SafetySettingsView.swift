@@ -85,7 +85,7 @@ struct SafetySettingsView: View {
                     }
                 }
                 Divider().overlay(QS.Color.border).padding(.vertical, 8)
-                SidebarNavRow(title: "Integrazioni", icon: "puzzlepiece.extension", selected: false) {
+                SidebarNavRow(title: L("Integrazioni"), icon: "puzzlepiece.extension", selected: false) {
                     state.openIntegrations()
                 }
                 SidebarNavRow(title: "Terminali", icon: "terminal", selected: false) {

@@ -165,17 +165,53 @@ func L(_ key: String) -> String {
 
 // MARK: - Settings UI
 
+/// Dedicated Settings → Language tab content.
+struct LanguageSettingsView: View {
+    @EnvironmentObject private var language: AppLanguageStore
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L("IMPOSTAZIONI"))
+                        .font(QS.Font.labelXS)
+                        .foregroundStyle(QS.Color.outline)
+                    Text(L("Lingua"))
+                        .font(QS.Font.ui(16, weight: .semibold))
+                        .foregroundStyle(QS.Color.onSurface)
+                    Text(L("Lingua dell’interfaccia. Sistema segue macOS; scegli Italiano o English per forzarla."))
+                        .font(QS.Font.ui(11))
+                        .foregroundStyle(QS.Color.outline)
+                        .frame(maxWidth: 560, alignment: .leading)
+                }
+                Spacer()
+            }
+            .padding(16)
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 14) {
+                    LanguageSettingsCard()
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 24)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(QS.Color.backgroundDeep)
+    }
+}
+
 struct LanguageSettingsCard: View {
     @EnvironmentObject private var language: AppLanguageStore
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(language.isEnglish ? "Language" : "Lingua")
+            Text(L("Lingua"))
                 .font(QS.Font.ui(13, weight: .semibold))
                 .foregroundStyle(QS.Color.onSurface)
-            Text(language.isEnglish
-                 ? "UI language for QS Agents. System follows macOS; choose Italiano or English to force it."
-                 : "Lingua dell’interfaccia. Sistema segue macOS; scegli Italiano o English per forzarla.")
+            Text(L("Lingua dell’interfaccia. Sistema segue macOS; scegli Italiano o English per forzarla."))
                 .font(QS.Font.ui(11))
                 .foregroundStyle(QS.Color.onSurfaceVariant)
             Picker("", selection: $language.preference) {

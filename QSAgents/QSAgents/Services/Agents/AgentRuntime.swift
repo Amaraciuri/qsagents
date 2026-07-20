@@ -679,6 +679,7 @@ final class AgentRuntime {
             }
         }
         m = m.trimmingCharacters(in: .whitespacesAndNewlines)
+        m = provider.canonicalizeModelID(m)
         return m.isEmpty ? provider.defaultModel : m
     }
 

@@ -359,7 +359,7 @@ struct StandardSidebar: View {
     private var navItems: [(title: String, icon: String, selected: Bool, action: () -> Void)] {
         [
             (
-                "Workspace file",
+                L("Workspace file"),
                 "folder.fill",
                 state.mainTab == .orchestrator && state.orchestratorMode == .workspace && !state.showIntegrations,
                 {
@@ -371,7 +371,7 @@ struct StandardSidebar: View {
                 }
             ),
             (
-                "Chat orchestratore",
+                L("Chat orchestratore"),
                 "bubble.left.and.bubble.right",
                 state.mainTab == .orchestrator && state.orchestratorMode == .chat && !state.showIntegrations,
                 {
@@ -405,7 +405,7 @@ struct StandardSidebar: View {
                 }
             ),
             (
-                "Terminali PTY",
+                L("Terminali PTY"),
                 "terminal",
                 state.mainTab == .dashboard && !state.showIntegrations,
                 {
@@ -426,7 +426,7 @@ struct StandardSidebar: View {
                 }
             ),
             (
-                "Integrazioni",
+                L("Integrazioni"),
                 "gearshape",
                 state.showIntegrations,
                 {

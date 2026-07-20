@@ -672,13 +672,11 @@ struct SupportSettingsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Supporto & produzione")
+                Text(L("Supporto & produzione"))
                     .font(QS.Font.ui(18, weight: .semibold))
-                Text("Diagnostica locale (nessuna telemetria). \(AppConfig.versionLabel).")
+                Text("\(L("Diagnostica locale (nessuna telemetria).")) \(AppConfig.versionLabel).")
                     .font(QS.Font.ui(12))
                     .foregroundStyle(QS.Color.onSurfaceVariant)
-
-                LanguageSettingsCard()
 
                 HStack(spacing: 10) {
                     Button {

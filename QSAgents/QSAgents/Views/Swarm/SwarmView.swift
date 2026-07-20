@@ -141,7 +141,7 @@ struct SwarmView: View {
                     state.orchestratorMode = .tasks
                     state.showIntegrations = false
                 }
-                navRow("Chat orchestratore", icon: "bubble.left.and.bubble.right", selected: false) {
+                navRow(L("Chat orchestratore"), icon: "bubble.left.and.bubble.right", selected: false) {
                     state.mainTab = .orchestrator
                     state.orchestratorMode = .chat
                     state.showIntegrations = false

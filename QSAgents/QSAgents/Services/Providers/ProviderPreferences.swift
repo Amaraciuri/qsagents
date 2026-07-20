@@ -60,9 +60,16 @@ final class ProviderPreferences: ObservableObject {
         let p = provider(for: role)
         if let m = modelByRole[role.rawValue], !m.isEmpty {
             let cleaned = Self.stripProviderPrefix(m)
+            let canonical = p?.canonicalizeModelID(cleaned) ?? cleaned
+            // Persist migration when legacy slug was rewritten (e.g. grok-4-5 → grok-4.5)
+            if canonical != cleaned, let p {
+                modelByRole[role.rawValue] = canonical
+                persist()
+            }
             // Keep model if still valid for provider; otherwise default
-            if let p, p.models.contains(cleaned) || cleaned.contains("/") { return cleaned }
-            if p == nil { return cleaned }
+            if let p, p.models.contains(canonical) || canonical.contains("/") { return canonical }
+            if p == nil { return canonical }
+            return p?.defaultModel ?? "local"
         }
         return p?.defaultModel ?? "local"
     }
@@ -100,7 +107,7 @@ final class ProviderPreferences: ObservableObject {
     /// Keep Swarm on the same live provider/model as the orchestrator chat (kills «no key» bootstrap).
     func syncSwarmFromLive(provider: LLMProviderKind, model: String) {
         guard LLMClient.shared.hasKey(provider) else { return }
-        let m = Self.stripProviderPrefix(model)
+        let m = provider.canonicalizeModelID(Self.stripProviderPrefix(model))
         let useModel = m.isEmpty || m == "local" ? provider.defaultModel : m
         applyToAllSwarmRoles(provider: provider, model: useModel)
         AppLogger.info("Swarm routing sync ← \(provider.displayName)/\(useModel)")
@@ -256,6 +263,25 @@ final class ProviderPreferences: ObservableObject {
         defaultProviderRaw = p.defaultProviderRaw
         modelByRole = p.modelByRole
         providerByRole = p.providerByRole ?? [:]
+        migrateLegacyModelIDsIfNeeded()
+    }
+
+    /// Rewrite invalid legacy SpaceX AI slugs (e.g. `grok-4-5`) to current API IDs.
+    private func migrateLegacyModelIDsIfNeeded() {
+        var changed = false
+        for (role, raw) in modelByRole {
+            let cleaned = Self.stripProviderPrefix(raw)
+            let providerRaw = providerByRole[role] ?? defaultProviderRaw
+            let kind = LLMProviderKind(rawValue: providerRaw)
+                ?? (["Grok", "xAI"].contains(providerRaw) ? .spaceXAI : nil)
+            guard let kind else { continue }
+            let canonical = kind.canonicalizeModelID(cleaned)
+            if canonical != raw {
+                modelByRole[role] = canonical
+                changed = true
+            }
+        }
+        if changed { persist() }
     }
 
     private func persist() {

@@ -57,3 +57,4 @@ service-account*.json
 # Optional filter-repo / backup leftovers
 *.orig
 build-release-*/
+build-l10n/

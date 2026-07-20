@@ -60,3 +60,4 @@ QSAgents/tools/sparkle/BinaryDelta
 QSAgents/distribution/*.zip
 QSAgents/distribution/*.dmg
 QSAgents/build-hardening/
+QSAgents/build-l10n/

@@ -50,6 +50,9 @@ struct QSAgentsApp: App {
                 .onAppear {
                     bootstrap()
                 }
+                .onChange(of: language.code) { _, _ in
+                    orchestrator.refreshWelcomeForLanguageIfNeeded()
+                }
                 .sheet(isPresented: $showOnboarding) {
                     OnboardingView {
                         showOnboarding = false

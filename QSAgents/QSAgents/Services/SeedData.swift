@@ -285,7 +285,7 @@ enum SeedData {
     }
 
     static let integrations: [AIIntegration] = [
-        .init(name: "SpaceX AI", provider: "XAI / GROK", status: .notConfigured, icon: "bolt.fill", modelHint: "grok-4-5"),
+        .init(name: "SpaceX AI", provider: "XAI / GROK", status: .notConfigured, icon: "bolt.fill", modelHint: "grok-4.5"),
         .init(name: "OpenAI", provider: "OPENAI", status: .notConfigured, icon: "brain", modelHint: "gpt-4.1"),
         .init(name: "Anthropic", provider: "ANTHROPIC", status: .notConfigured, icon: "brain.head.profile", modelHint: "opus-4.8 · sonnet-5"),
         .init(name: "Gemini", provider: "GOOGLE", status: .notConfigured, icon: "diamond.fill", modelHint: "2.5-pro"),

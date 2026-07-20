@@ -11,6 +11,7 @@ struct IntegrationsView: View {
     enum SettingsSection: String, CaseIterable, Identifiable {
         case integrations
         case tutorials
+        case language
         case permissions
         case gdpr
         case changelog
@@ -22,6 +23,7 @@ struct IntegrationsView: View {
             switch self {
             case .integrations: return "Integrazioni"
             case .tutorials: return "Tutorial"
+            case .language: return "Lingua"
             case .permissions: return "Permessi"
             case .gdpr: return "GDPR"
             case .changelog: return "Novità"
@@ -34,6 +36,7 @@ struct IntegrationsView: View {
             switch self {
             case .integrations: return "puzzlepiece.extension"
             case .tutorials: return "book.fill"
+            case .language: return "globe"
             case .permissions: return "mic.and.signal.meter"
             case .gdpr: return "hand.raised.fill"
             case .changelog: return "newspaper.fill"
@@ -56,6 +59,8 @@ struct IntegrationsView: View {
                 integrationsMain
             case .tutorials:
                 TutorialsView()
+            case .language:
+                LanguageSettingsView()
             case .permissions:
                 PermissionsSettingsView()
             case .gdpr:
@@ -88,6 +93,9 @@ struct IntegrationsView: View {
             } else if state.openSettingsSection == "permissions" {
                 section = .permissions
                 state.openSettingsSection = nil
+            } else if state.openSettingsSection == "language" || state.openSettingsSection == "lingua" {
+                section = .language
+                state.openSettingsSection = nil
             }
             state.refreshIntegrationStatuses()
             voice.refreshAllPermissions()
@@ -110,7 +118,7 @@ struct IntegrationsView: View {
                 Text("QS AGENTS")
                     .font(QS.Font.ui(12, weight: .bold))
                     .foregroundStyle(QS.Color.onSurface)
-                Text("Impostazioni")
+                Text(L("Impostazioni"))
                     .font(QS.Font.labelXS)
                     .foregroundStyle(QS.Color.outline)
             }
@@ -130,6 +138,13 @@ struct IntegrationsView: View {
                     selected: section == .tutorials
                 ) {
                     section = .tutorials
+                }
+                SidebarNavRow(
+                    title: L("Lingua"),
+                    icon: "globe",
+                    selected: section == .language
+                ) {
+                    section = .language
                 }
                 SidebarNavRow(
                     title: L("Permessi"),
@@ -200,13 +215,13 @@ struct IntegrationsView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("INTEGRAZIONI")
+                    Text(L("INTEGRAZIONI"))
                         .font(QS.Font.labelXS)
                         .foregroundStyle(QS.Color.outline)
-                    Text("AI & GITHUB")
+                    Text(L("AI & GITHUB"))
                         .font(QS.Font.ui(16, weight: .semibold))
                         .foregroundStyle(QS.Color.onSurface)
-                    Text("API key in Keychain · OpenAI: anche login ChatGPT (Codex) · Claude: API key Console (policy Anthropic).")
+                    Text(L("API key in Keychain · OpenAI: anche login ChatGPT (Codex) · Claude: API key Console (policy Anthropic)."))
                         .font(QS.Font.ui(11))
                         .foregroundStyle(QS.Color.outline)
                         .frame(maxWidth: 560, alignment: .leading)
@@ -214,9 +229,9 @@ struct IntegrationsView: View {
 
                 Spacer()
 
-                QSSearchField(placeholder: "Cerca provider...", text: $state.integrationSearch)
+                QSSearchField(placeholder: L("Cerca provider..."), text: $state.integrationSearch)
 
-                PrimaryButton(title: "Aggiungi Personalizzato", icon: "plus", compact: true) {}
+                PrimaryButton(title: L("Aggiungi Personalizzato"), icon: "plus", compact: true) {}
             }
             .padding(16)
 
@@ -290,19 +305,19 @@ struct PermissionsSettingsView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("IMPOSTAZIONI")
+                    Text(L("IMPOSTAZIONI"))
                         .font(QS.Font.labelXS)
                         .foregroundStyle(QS.Color.outline)
-                    Text("Permessi")
+                    Text(L("Permessi"))
                         .font(QS.Font.ui(16, weight: .semibold))
                         .foregroundStyle(QS.Color.onSurface)
-                    Text("Microfono e riconoscimento vocale per ⌘K e comandi parlati. Se hai premuto «Non consentire», macOS non ripropone il dialog: si riabilita da qui → Impostazioni Sistema.")
+                    Text(L("Microfono e riconoscimento vocale per ⌘K e comandi parlati. Se hai premuto «Non consentire», macOS non ripropone il dialog: si riabilita da qui → Impostazioni Sistema."))
                         .font(QS.Font.ui(11))
                         .foregroundStyle(QS.Color.outline)
                         .frame(maxWidth: 560, alignment: .leading)
                 }
                 Spacer()
-                GhostButton(title: "Aggiorna stato", icon: "arrow.clockwise") {
+                GhostButton(title: L("Aggiorna stato"), icon: "arrow.clockwise") {
                     voice.refreshAllPermissions()
                 }
             }
@@ -310,22 +325,20 @@ struct PermissionsSettingsView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    LanguageSettingsCard()
-
                     // Combined readiness
                     HStack(spacing: 10) {
                         Image(systemName: voice.bothPermissionsReady ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
                             .foregroundStyle(voice.bothPermissionsReady ? QS.Color.agentActive : QS.Color.agentThinking)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(voice.bothPermissionsReady ? "Pronti per la voce" : "Permessi incompleti")
+                            Text(voice.bothPermissionsReady ? L("Pronti per la voce") : L("Permessi incompleti"))
                                 .font(QS.Font.ui(13, weight: .semibold))
                                 .foregroundStyle(QS.Color.onSurface)
-                            Text(voice.statusMessage)
+                            Text(L(voice.statusMessage))
                                 .font(QS.Font.ui(11))
                                 .foregroundStyle(QS.Color.onSurfaceVariant)
                         }
                         Spacer()
-                        PrimaryButton(title: "Testa microfono", icon: "stethoscope", compact: true) {
+                        PrimaryButton(title: L("Testa microfono"), icon: "stethoscope", compact: true) {
                             voice.runMicProbe()
                         }
                     }
@@ -334,12 +347,12 @@ struct PermissionsSettingsView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
 
                     permissionCard(
-                        title: "Microfono",
+                        title: L("Microfono"),
                         icon: "mic.fill",
-                        status: voice.microphoneStatusLabel,
+                        status: L(voice.microphoneStatusLabel),
                         ok: voice.microphoneAuthorized,
-                        detail: "Serve per catturare l’audio quando usi 🎤. Bundle: com.qsagents.mac",
-                        primaryTitle: voice.microphoneAuthorized ? "Ricarica stato" : "Richiedi permesso",
+                        detail: L("Serve per catturare l’audio quando usi 🎤. Bundle: com.qsagents.mac"),
+                        primaryTitle: voice.microphoneAuthorized ? L("Ricarica stato") : L("Richiedi permesso"),
                         primaryAction: {
                             voice.requestMicrophoneIfNeeded()
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
@@ -349,17 +362,17 @@ struct PermissionsSettingsView: View {
                                 }
                             }
                         },
-                        secondaryTitle: "Apri Privacy → Microfono",
+                        secondaryTitle: L("Apri Privacy → Microfono"),
                         secondaryAction: { voice.openSystemMicrophoneSettings() }
                     )
 
                     permissionCard(
-                        title: "Riconoscimento vocale",
+                        title: L("Riconoscimento vocale"),
                         icon: "waveform",
-                        status: voice.speechStatusLabel,
+                        status: L(voice.speechStatusLabel),
                         ok: voice.isAuthorized,
-                        detail: "Trasforma la voce in testo per l’Orchestratore e i terminali.",
-                        primaryTitle: voice.isAuthorized ? "Ricarica stato" : "Richiedi permesso",
+                        detail: L("Trasforma la voce in testo per l’Orchestratore e i terminali."),
+                        primaryTitle: voice.isAuthorized ? L("Ricarica stato") : L("Richiedi permesso"),
                         primaryAction: {
                             voice.requestPermissionsIfNeeded()
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
@@ -369,7 +382,7 @@ struct PermissionsSettingsView: View {
                                 }
                             }
                         },
-                        secondaryTitle: "Apri Privacy → Riconoscimento vocale",
+                        secondaryTitle: L("Apri Privacy → Riconoscimento vocale"),
                         secondaryAction: { voice.openSystemSpeechSettings() }
                     )
 
@@ -391,10 +404,10 @@ struct PermissionsSettingsView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Se resta OFF")
+                        Text(L("Se resta OFF"))
                             .font(QS.Font.ui(13, weight: .semibold))
                             .foregroundStyle(QS.Color.onSurface)
-                        Text("""
+                        Text(L("""
                         1. Chiudi completamente QS Agents (⌘Q)
                         2. Impostazioni Sistema → Privacy e sicurezza → Microfono
                            → attiva **QS Agents** (bundle com.qsagents.mac)
@@ -402,14 +415,14 @@ struct PermissionsSettingsView: View {
                         4. Riapri l’app, torna qui → «Aggiorna stato» → «Testa microfono»
                         5. Se non compare in lista: premi 🎤 in ⌘K una volta (fa scattare il dialog TCC)
                         6. Se hai più copie dell’app, abilita quella che stai eseguendo ora
-                        """)
+                        """))
                             .font(QS.Font.ui(12))
                             .foregroundStyle(QS.Color.onSurfaceVariant)
                         HStack(spacing: 8) {
-                            GhostButton(title: "Apri Privacy e sicurezza", icon: "gear") {
+                            GhostButton(title: L("Apri Privacy e sicurezza"), icon: "gear") {
                                 voice.openSystemPrivacySettings()
                             }
-                            GhostButton(title: "Richiedi entrambi", icon: "hand.raised") {
+                            GhostButton(title: L("Richiedi entrambi"), icon: "hand.raised") {
                                 voice.requestPermissionsIfNeeded()
                             }
                         }

@@ -54,6 +54,22 @@ enum AppChangelog {
     /// Newest first.
     static let releases: [Entry] = [
         Entry(
+            id: "1.0.2",
+            version: "1.0.2",
+            date: "20 Jul 2026",
+            title: "English Language tab · Kimi · SpaceX AI Grok",
+            tagline: "In-app English tab + i18n, OpenRouter Kimi, SpaceX AI grok-4.5 model IDs.",
+            kind: .feature,
+            highlights: [
+                .init(icon: "globe", title: "English Language tab",
+                      detail: "Dedicated Language settings with fuller EN/IT coverage."),
+                .init(icon: "sparkles", title: "OpenRouter Kimi",
+                      detail: "moonshotai/kimi models available via OpenRouter."),
+                .init(icon: "cpu", title: "SpaceX AI grok-4.5",
+                      detail: "Canonical dotted model IDs; migrates legacy grok-4-5 prefs."),
+            ]
+        ),
+        Entry(
             id: "1.0.0",
             version: "1.0.0",
             date: "20 Jul 2026",
@@ -534,7 +550,7 @@ enum AppChangelog {
             ]
         ),
         Entry(
-            id: "1.0.2",
+            id: "1.0.2-legacy",
             version: "1.0.2",
             date: "17 lug 2026",
             title: "Smart plan, key & picker stabili",

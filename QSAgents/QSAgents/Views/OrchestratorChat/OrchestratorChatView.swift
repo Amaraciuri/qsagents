@@ -767,8 +767,8 @@ struct OrchestratorActivityPanel: View {
                         .foregroundStyle(QS.Color.primary)
                 }
                 Text(orchestrator.livePhase.isBusy || orchestrator.isThinking
-                     ? orchestrator.livePhase.label
-                     : "Attività")
+                     ? L(orchestrator.livePhase.label)
+                     : L("Attività"))
                     .font(QS.Font.ui(12, weight: .semibold))
                     .foregroundStyle(QS.Color.onSurface)
                 if !orchestrator.liveDetail.isEmpty, orchestrator.livePhase.isBusy {
@@ -788,7 +788,7 @@ struct OrchestratorActivityPanel: View {
                             .foregroundStyle(entry.done ? QS.Color.agentActive : QS.Color.primary)
                             .frame(width: 14)
                         VStack(alignment: .leading, spacing: 1) {
-                            Text(entry.phase.label)
+                            Text(L(entry.phase.label))
                                 .font(QS.Font.labelXS)
                                 .foregroundStyle(entry.done ? QS.Color.outline : QS.Color.primary)
                             if !entry.detail.isEmpty {

@@ -167,7 +167,7 @@ struct HomeHubView: View {
         HStack(alignment: .top, spacing: 14) {
             // Live model switch
             VStack(alignment: .leading, spacing: 10) {
-                Text("Modello orchestratore")
+                Text(L("Modello orchestratore"))
                     .font(QS.Font.ui(13, weight: .semibold))
                     .foregroundStyle(QS.Color.onSurface)
                 Text(L("Cambia al volo — la prossima risposta usa questo provider/modello."))
@@ -355,7 +355,7 @@ struct HomeHubView: View {
                 }
 
                 sectionCard(
-                    title: "Integrazioni",
+                    title: L("Integrazioni"),
                     subtitle: "AI · GitHub",
                     icon: "puzzlepiece.extension",
                     tint: QS.Color.primary
@@ -364,7 +364,7 @@ struct HomeHubView: View {
                 }
 
                 sectionCard(
-                    title: "Sicurezza",
+                    title: L("Sicurezza"),
                     subtitle: "Guardrail · audit",
                     icon: "shield.lefthalf.filled",
                     tint: QS.Color.agentError

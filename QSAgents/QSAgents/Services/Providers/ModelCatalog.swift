@@ -139,10 +139,14 @@ final class ModelCatalog: ObservableObject {
     private func curated(for provider: LLMProviderKind) -> [String] {
         switch provider {
         case .spaceXAI:
+            // Current xAI API IDs (docs.x.ai/developers/models) — dotted, not hyphenated.
             return [
-                "grok-4-5", "grok-4", "grok-3", "grok-3-mini", "grok-3-fast",
-                "grok-2-latest", "grok-2-1212", "grok-2-vision-1212",
-                "grok-beta", "grok-vision-beta",
+                "grok-4.5",
+                "grok-4.3",
+                "grok-4.20-0309-reasoning",
+                "grok-4.20-0309-non-reasoning",
+                "grok-4.20-multi-agent-0309",
+                "grok-build-0.1",
             ]
         case .openAI:
             return [

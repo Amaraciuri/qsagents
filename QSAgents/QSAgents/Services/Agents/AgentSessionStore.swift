@@ -26,7 +26,7 @@ struct AgentSession: Identifiable, Equatable {
     let id: UUID
     var name: String
     var role: AgentRole
-    /// Display label and preferred model id (e.g. gpt-4.1 or grok-4-5).
+    /// Display label and preferred model id (e.g. gpt-4.1 or grok-4.5).
     /// Raw model id for the API (e.g. `anthropic/claude-opus-4.8`) — never a UI label.
     var model: String
     /// Optional provider override for this session (LLMProviderKind.rawValue).

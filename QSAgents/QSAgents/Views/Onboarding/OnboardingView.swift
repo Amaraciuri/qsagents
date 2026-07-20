@@ -15,7 +15,7 @@ struct OnboardingView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Benvenuto in QS Agents")
+                Text(L("Benvenuto in QS Agents"))
                     .font(QS.Font.ui(18, weight: .semibold))
                 Spacer()
                 Text("\(step + 1)/\(lastStep + 1)")
@@ -28,18 +28,18 @@ struct OnboardingView: View {
                 switch step {
                 case 0:
                     stepCard(
-                        title: "Multi-agent nativo macOS",
-                        body: "Terminali PTY reali, orchestratore ⌘K, task, git e guardrail — tutto locale. In ~60 secondi: workspace → engine → primo goal.",
+                        title: L("Multi-agent nativo macOS"),
+                        body: L("Terminali PTY reali, orchestratore ⌘K, task, git e guardrail — tutto locale. In ~60 secondi: workspace → engine → primo goal."),
                         icon: "cpu"
                     )
                 case 1:
                     VStack(alignment: .leading, spacing: 14) {
                         stepCard(
-                            title: "Apri un workspace",
-                            body: "Scegli la cartella del progetto (es. zackgame). File tree, git e coding CLI usano questa root — non la home.",
+                            title: L("Apri un workspace"),
+                            body: L("Scegli la cartella del progetto (es. zackgame). File tree, git e coding CLI usano questa root — non la home."),
                             icon: "folder"
                         )
-                        PrimaryButton(title: "Apri cartella…", icon: "folder.badge.plus") {
+                        PrimaryButton(title: L("Apri cartella…"), icon: "folder.badge.plus") {
                             workspaces.pickAndOpen()
                         }
                         if let ws = workspaces.current {
@@ -51,8 +51,8 @@ struct OnboardingView: View {
                 case 2:
                     VStack(alignment: .leading, spacing: 14) {
                         stepCard(
-                            title: "Coding engine (chi scrive il codice)",
-                            body: "È diverso dal modello Home. Auto prova Claude CLI → Grok → QS API. Swarm solo se lo scegli tu o dici «avvia missione».",
+                            title: L("Coding engine (chi scrive il codice)"),
+                            body: L("È diverso dal modello Home. Auto prova Claude CLI → Grok → QS API. Swarm solo se lo scegli tu o dici «avvia missione»."),
                             icon: "terminal"
                         )
                         Picker("Engine", selection: $orchestrator.codingEngine) {
@@ -65,18 +65,18 @@ struct OnboardingView: View {
                             .font(QS.Font.ui(11))
                             .foregroundStyle(QS.Color.outline)
                             .fixedSize(horizontal: false, vertical: true)
-                        Text("Suggerimento: Claude CLI = account Claude sul Mac. QS API = key da Integrazioni (es. Haiku).")
+                        Text(L("Suggerimento: Claude CLI = account Claude sul Mac. QS API = key da Integrazioni (es. Haiku)."))
                             .font(QS.Font.ui(11))
                             .foregroundStyle(QS.Color.onSurfaceVariant)
                     }
                 case 3:
                     VStack(alignment: .leading, spacing: 14) {
                         stepCard(
-                            title: "Integrazioni AI (opzionale)",
-                            body: "Key in Keychain per orchestratore / QS API. Claude CLI può funzionare senza key QS se hai già `claude` loggato.",
+                            title: L("Integrazioni AI (opzionale)"),
+                            body: L("Key in Keychain per orchestratore / QS API. Claude CLI può funzionare senza key QS se hai già `claude` loggato."),
                             icon: "key"
                         )
-                        PrimaryButton(title: "Apri Integrazioni", icon: "puzzlepiece.extension") {
+                        PrimaryButton(title: L("Apri Integrazioni"), icon: "puzzlepiece.extension") {
                             state.openIntegrations()
                         }
                         Text(LLMClient.shared.configuredSummary())
@@ -86,15 +86,15 @@ struct OnboardingView: View {
                 default:
                     VStack(alignment: .leading, spacing: 14) {
                         stepCard(
-                            title: "Sicurezza + scorciatoie goal",
-                            body: "Applica il profilo DEV. In chat, «Salva scorciatoia» memorizza un goal ripetibile (ex «ricetta») — non è un menu di cucina.",
+                            title: L("Sicurezza + scorciatoie goal"),
+                            body: L("Applica il profilo DEV. In chat, «Salva scorciatoia» memorizza un goal ripetibile (ex «ricetta») — non è un menu di cucina."),
                             icon: "shield.lefthalf.filled"
                         )
-                        PrimaryButton(title: "Applica setup consigliato", icon: "checkmark.shield") {
+                        PrimaryButton(title: L("Applica setup consigliato"), icon: "checkmark.shield") {
                             let paths = directories.projects.map(\.path) + workspaces.recent.map(\.path)
                             _ = safety.applyRecommendedProfile(projectPaths: paths)
                         }
-                        Text("Shortcuts: ⌘K orchestratore · ⌘⇧O workspace · ⌘⇧T task · ⌘, integrazioni")
+                        Text(L("Shortcuts: ⌘K orchestratore · ⌘⇧O workspace · ⌘⇧T task · ⌘, integrazioni"))
                             .font(QS.Font.ui(11))
                             .foregroundStyle(QS.Color.outline)
                     }
