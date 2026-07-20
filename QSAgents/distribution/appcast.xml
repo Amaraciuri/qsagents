@@ -6,24 +6,24 @@
     <description>Aggiornamenti QS Agents (Developer ID + notarized).</description>
     <language>it</language>
     <item>
-      <title>QS Agents 1.0.4</title>
-      <pubDate>Mon, 20 Jul 2026 08:08:23 +0000</pubDate>
-      <sparkle:version>17</sparkle:version>
-      <sparkle:shortVersionString>1.0.4</sparkle:shortVersionString>
+      <title>QS Agents 1.0.5</title>
+      <pubDate>Mon, 20 Jul 2026 10:47:00 +0000</pubDate>
+      <sparkle:version>18</sparkle:version>
+      <sparkle:shortVersionString>1.0.5</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
       <description><![CDATA[
         <ul>
-          <li>Allowlist path fix (cmd|path) + allowlist off</li>
-          <li>Auto QS Task from orchestrator/mission goals</li>
-          <li>OpenRouter/Kimi decode + retry resilience</li>
-          <li>QS Agents 1.0.4 (build 17)</li>
+          <li>Knowledge Operativa (TABELLA OPERATIVA)</li>
+          <li>Avvia / Continua / Revisiona + archive panel</li>
+          <li>OpenRouter 402 credits UX + max_tokens caps</li>
+          <li>QS Agents 1.0.5 (build 18)</li>
         </ul>
       ]]></description>
       <enclosure
-        url="https://github.com/Amaraciuri/qsagents/releases/download/v1.0.4/QS-Agents.zip"
-        length="6258735"
+        url="https://github.com/Amaraciuri/qsagents/releases/download/v1.0.5/QS-Agents.zip"
+        length="6444625"
         type="application/octet-stream"
-        sparkle:edSignature="PZGy2HN14kcJvuHRVVe8M8A+T8/ByS4oyEDEkUBPcOPa9TSXVD1MQFhFcHZyzAvKx7FTJcbNlioofW9cIKuBAg==" />
+        sparkle:edSignature="hNLbrU0yhNJfNNd4s3DbGnpE5IUbRc8+4P+phNH+m30+PFjd8DJkRI89ISyRoF2dNzZTt32eWs6AkplC1HcnDA==" />
     </item>
   </channel>
 </rss>
