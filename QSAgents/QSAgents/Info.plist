@@ -42,12 +42,16 @@
 	<string>https://raw.githubusercontent.com/Amaraciuri/qsagents/main/QSAgents/distribution/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>JksAaRJ7unwhfAFLol2sd5s9EFyJ5v96WsHWRFmeB6Q=</string>
+	<!-- Automatic background checks + launch check via checkForUpdatesInBackground(). -->
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUScheduledCheckInterval</key>
 	<integer>86400</integer>
+	<!-- Prompt user (native Sparkle alert); do not silently install. -->
 	<key>SUAutomaticallyUpdate</key>
 	<false/>
+	<key>SUAllowsAutomaticUpdates</key>
+	<true/>
 </dict>
 </plist>
 

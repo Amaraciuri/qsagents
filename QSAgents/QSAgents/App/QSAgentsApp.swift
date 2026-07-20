@@ -358,6 +358,12 @@ struct QSAgentsApp: App {
 
         AppLogger.info("Bootstrap complete · demo=\(AppConfig.useDemoData) · workspace=\(workspaces.current?.path ?? "nil") · tasks=\(taskStore.tasks.count)")
 
+        // Sparkle: background check on launch (native alert if update found). Scheduled
+        // checks continue via Info.plist SUEnableAutomaticChecks / SUScheduledCheckInterval.
+        DispatchQueue.main.async { [sparkle] in
+            sparkle.checkForUpdatesInBackgroundAfterLaunch()
+        }
+
         // If projects scan finishes late, top up allowlist once
         Task {
             await directories.scanProjects()

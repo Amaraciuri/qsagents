@@ -103,93 +103,106 @@ struct TopBarView: View {
     @EnvironmentObject private var workspaces: WorkspaceStore
     @EnvironmentObject private var notices: AppNotificationCenter
 
+    private var topNavItems: [TopNavItem] {
+        [
+            TopNavItem(
+                id: "home",
+                title: L("Home"),
+                selected: !state.showIntegrations && !state.showSafety && state.mainTab == .home
+            ) { state.navigate(to: .home) },
+            TopNavItem(
+                id: "terminals",
+                title: L("Terminali"),
+                selected: !state.showIntegrations && !state.showSafety && state.mainTab == .dashboard
+            ) { state.navigate(to: .dashboard) },
+            TopNavItem(
+                id: "chat",
+                title: L("Chat"),
+                selected: !state.showIntegrations
+                    && !state.showSafety
+                    && state.mainTab == .orchestrator
+                    && state.orchestratorMode == .chat
+            ) {
+                state.navigate(to: .orchestrator)
+                state.orchestratorMode = .chat
+            },
+            TopNavItem(
+                id: "tasks",
+                title: L("QS Tasks"),
+                selected: !state.showIntegrations
+                    && !state.showSafety
+                    && state.mainTab == .orchestrator
+                    && state.orchestratorMode == .tasks
+            ) {
+                state.showIntegrations = false
+                state.showSafety = false
+                state.mainTab = .orchestrator
+                state.orchestratorMode = .tasks
+            },
+            TopNavItem(
+                id: "swarm",
+                title: L("QS Swarm"),
+                selected: !state.showIntegrations
+                    && !state.showSafety
+                    && state.mainTab == .orchestrator
+                    && state.orchestratorMode == .swarm
+            ) {
+                state.showIntegrations = false
+                state.showSafety = false
+                state.mainTab = .orchestrator
+                state.orchestratorMode = .swarm
+            },
+            TopNavItem(
+                id: "workspace",
+                title: L("Workspace"),
+                selected: !state.showIntegrations
+                    && !state.showSafety
+                    && state.mainTab == .orchestrator
+                    && state.orchestratorMode == .workspace
+            ) {
+                state.navigate(to: .orchestrator)
+                state.orchestratorMode = .workspace
+            },
+            TopNavItem(
+                id: "knowledge",
+                title: L("Knowledge"),
+                selected: !state.showIntegrations && !state.showSafety && state.mainTab == .monitor
+            ) { state.navigate(to: .monitor) },
+        ]
+    }
+
     var body: some View {
-        HStack(spacing: 20) {
+        HStack(spacing: 16) {
+            // Brand + workspace always visible (never truncated away for nav overflow).
             HStack(spacing: 10) {
                 Text("QS AGENTS")
                     .font(QS.Font.ui(13, weight: .bold))
                     .foregroundStyle(QS.Color.onSurface)
                     .tracking(0.4)
+                    .fixedSize()
 
-                // Primary context: switch workspace in one menu (not a dead badge)
                 WorkspaceSwitcher(style: .compact)
 
                 if terminals.activeCount > 0 {
                     StatusChip(text: "\(terminals.activeCount) PTY", color: QS.Color.agentActive)
                 }
             }
+            .layoutPriority(2)
 
-            HStack(spacing: 4) {
-                // Primary destinations always visible
-                TopTab(
-                    title: "Home",
-                    selected: !state.showIntegrations && !state.showSafety && state.mainTab == .home
-                ) {
-                    state.navigate(to: .home)
-                }
-                TopTab(
-                    title: "Terminali",
-                    selected: !state.showIntegrations && !state.showSafety && state.mainTab == .dashboard
-                ) {
-                    state.navigate(to: .dashboard)
-                }
-                TopTab(
-                    title: "Chat",
-                    selected: !state.showIntegrations
-                        && !state.showSafety
-                        && state.mainTab == .orchestrator
-                        && state.orchestratorMode == .chat
-                ) {
-                    state.navigate(to: .orchestrator)
-                    state.orchestratorMode = .chat
-                }
-                // Always visible — user request
-                TopTab(
-                    title: "QS Tasks",
-                    selected: !state.showIntegrations
-                        && !state.showSafety
-                        && state.mainTab == .orchestrator
-                        && state.orchestratorMode == .tasks
-                ) {
-                    state.showIntegrations = false
-                    state.showSafety = false
-                    state.mainTab = .orchestrator
-                    state.orchestratorMode = .tasks
-                }
-                TopTab(
-                    title: "QS Swarm",
-                    selected: !state.showIntegrations
-                        && !state.showSafety
-                        && state.mainTab == .orchestrator
-                        && state.orchestratorMode == .swarm
-                ) {
-                    state.showIntegrations = false
-                    state.showSafety = false
-                    state.mainTab = .orchestrator
-                    state.orchestratorMode = .swarm
-                }
-                TopTab(
-                    title: "Workspace",
-                    selected: !state.showIntegrations
-                        && !state.showSafety
-                        && state.mainTab == .orchestrator
-                        && state.orchestratorMode == .workspace
-                ) {
-                    state.navigate(to: .orchestrator)
-                    state.orchestratorMode = .workspace
-                }
-                TopTab(
-                    title: "Knowledge",
-                    selected: !state.showIntegrations && !state.showSafety && state.mainTab == .monitor
-                ) {
-                    state.navigate(to: .monitor)
-                }
+            // Progressive collapse: full tabs → fewer + Altro/More — no “QS Sw…” ellipsis.
+            ViewThatFits(in: .horizontal) {
+                TopNavRow(visible: topNavItems, overflow: [])
+                TopNavRow(visible: Array(topNavItems.prefix(5)), overflow: Array(topNavItems.dropFirst(5)))
+                TopNavRow(visible: Array(topNavItems.prefix(4)), overflow: Array(topNavItems.dropFirst(4)))
+                TopNavRow(visible: Array(topNavItems.prefix(3)), overflow: Array(topNavItems.dropFirst(3)))
+                TopNavRow(visible: Array(topNavItems.prefix(2)), overflow: Array(topNavItems.dropFirst(2)))
+                TopNavRow(visible: Array(topNavItems.prefix(1)), overflow: Array(topNavItems.dropFirst(1)))
             }
+            .layoutPriority(1)
 
-            Spacer()
+            Spacer(minLength: 8)
 
             HStack(spacing: 6) {
-                // Cursor/VS Code style: toggle side rails
                 SidebarToggleIcon(
                     systemName: "sidebar.left",
                     isOpen: state.showLeftSidebar,
@@ -206,19 +219,18 @@ struct TopBarView: View {
                 }
 
                 ToolbarIconButton(systemName: "folder.badge.plus") {
-                    // Open via notification — WorkspaceStore is env object on root
                     NotificationCenter.default.post(name: .qsOpenWorkspacePicker, object: nil)
                 }
 
-                // Global orchestrator — always available
                 Button {
                     state.toggleOrchestratorModal()
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "sparkles")
                             .font(.system(size: 11, weight: .semibold))
-                        Text("Orchestratore")
+                        Text(L("Orchestratore"))
                             .font(QS.Font.ui(11, weight: .semibold))
+                            .fixedSize()
                         Text("⌘K")
                             .font(QS.Font.labelXS)
                             .foregroundStyle(QS.Color.primary.opacity(0.85))
@@ -253,6 +265,8 @@ struct TopBarView: View {
                     placeholder: searchPlaceholder,
                     text: $state.searchText
                 )
+                .frame(minWidth: 100, idealWidth: 160, maxWidth: 220)
+
                 ToolbarIconButton(systemName: "plus.rectangle.on.folder") {
                     terminals.pickDirectoryAndOpen()
                     state.navigate(to: .dashboard)
@@ -267,7 +281,6 @@ struct TopBarView: View {
                 ) {
                     notices.togglePanel()
                 }
-                // Sheet — NOT .popover: NSPopover+ViewBridge crashes on macOS 15/26 betas (SIGTRAP).
                 .sheet(isPresented: $notices.showPanel) {
                     NotificationCenterPanel()
                         .environmentObject(notices)
@@ -300,6 +313,7 @@ struct TopBarView: View {
                             .foregroundStyle(.white)
                     )
             }
+            .layoutPriority(2)
         }
         .padding(.horizontal, QS.Spacing.windowPadding)
         .frame(height: 44)
@@ -319,6 +333,75 @@ struct TopBarView: View {
             }
         case .monitor: return "Cerca nella base di conoscenza..."
         }
+    }
+}
+
+private struct TopNavItem: Identifiable {
+    let id: String
+    let title: String
+    let selected: Bool
+    let action: () -> Void
+}
+
+private struct TopNavRow: View {
+    let visible: [TopNavItem]
+    let overflow: [TopNavItem]
+
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(visible) { item in
+                TopTab(title: item.title, selected: item.selected, action: item.action)
+            }
+            if !overflow.isEmpty {
+                TopNavMoreMenu(items: overflow)
+            }
+        }
+        .fixedSize(horizontal: true, vertical: false)
+    }
+}
+
+private struct TopNavMoreMenu: View {
+    let items: [TopNavItem]
+
+    private var overflowSelected: Bool {
+        items.contains(where: \.selected)
+    }
+
+    var body: some View {
+        Menu {
+            ForEach(items) { item in
+                Button {
+                    item.action()
+                } label: {
+                    if item.selected {
+                        Label(item.title, systemImage: "checkmark")
+                    } else {
+                        Text(item.title)
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Text(L("Altro"))
+                    .font(QS.Font.ui(13, weight: overflowSelected ? .semibold : .regular))
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9, weight: .semibold))
+            }
+            .foregroundStyle(overflowSelected ? QS.Color.primary : QS.Color.onSurfaceVariant)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .overlay(alignment: .bottom) {
+                if overflowSelected {
+                    Rectangle()
+                        .fill(QS.Color.primarySolid)
+                        .frame(height: 2)
+                        .offset(y: 8)
+                }
+            }
+            .fixedSize()
+        }
+        .menuStyle(.borderlessButton)
+        .help(L("Altre sezioni di navigazione"))
     }
 }
 
@@ -342,6 +425,7 @@ private struct TopTab: View {
                             .offset(y: 8)
                     }
                 }
+                .fixedSize()
         }
         .buttonStyle(.plain)
     }

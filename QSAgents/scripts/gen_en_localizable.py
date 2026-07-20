@@ -280,6 +280,8 @@ EXACT: dict[str, str] = {
     "live": "live",
     "Git": "Git",
     "OpenRouter": "OpenRouter",
+    "Altro": "More",
+    "Altre sezioni di navigazione": "More navigation sections",
     "Ambiente e guardrail QS Agents": "QS Agents environment & guardrails",
     "Knowledge Graph": "Knowledge Graph",
     "QS Tasks": "QS Tasks",

@@ -54,6 +54,20 @@ enum AppChangelog {
     /// Newest first.
     static let releases: [Entry] = [
         Entry(
+            id: "1.0.3",
+            version: "1.0.3",
+            date: "20 Jul 2026",
+            title: "Auto-update on launch · Compact nav",
+            tagline: "Sparkle checks for updates at launch; responsive top nav with Altro/More overflow.",
+            kind: .feature,
+            highlights: [
+                .init(icon: "arrow.triangle.2.circlepath", title: "Update popup on launch",
+                      detail: "Sparkle checks for updates when the app starts so you see new builds sooner."),
+                .init(icon: "sidebar.left", title: "Compact top nav",
+                      detail: "Narrow windows fold secondary tabs into Altro/More instead of crowding the bar."),
+            ]
+        ),
+        Entry(
             id: "1.0.2",
             version: "1.0.2",
             date: "20 Jul 2026",
@@ -532,7 +546,7 @@ enum AppChangelog {
             ]
         ),
         Entry(
-            id: "1.0.3",
+            id: "1.0.3-legacy",
             version: "1.0.3",
             date: "17 lug 2026",
             title: "Swarm DAG, streaming & memoria",
