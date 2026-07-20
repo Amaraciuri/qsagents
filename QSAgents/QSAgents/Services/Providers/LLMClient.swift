@@ -138,6 +138,7 @@ enum LLMProviderKind: String, CaseIterable, Identifiable {
                 "meta-llama/llama-4-maverick", "meta-llama/llama-3.3-70b-instruct",
                 "deepseek/deepseek-r1", "deepseek/deepseek-chat-v3-0324",
                 "qwen/qwen3-235b-a22b", "mistralai/mistral-large",
+                "moonshotai/kimi-k3", "moonshotai/kimi-k2.5", "moonshotai/kimi-k2-thinking",
                 "perplexity/sonar-pro", "openrouter/auto",
             ]
         }

@@ -59,7 +59,7 @@ final class ModelCatalog: ObservableObject {
         if isLoadingOpenRouter { return }
         if !force, let last = lastFetchAt, Date().timeIntervalSince(last) < 300 { return }
         guard LLMClient.shared.hasKey(.openRouter) else {
-            lastFetchError = "Nessuna key OpenRouter"
+            lastFetchError = L("Nessuna key OpenRouter")
             return
         }
         isLoadingOpenRouter = true
@@ -114,6 +114,7 @@ final class ModelCatalog: ObservableObject {
         let preferredPrefixes = [
             "openai/", "anthropic/", "google/", "x-ai/", "meta-llama/",
             "deepseek/", "qwen/", "mistralai/", "perplexity/", "cohere/",
+            "moonshotai/",
         ]
         let allIDs = arr.compactMap { $0["id"] as? String }.filter { !$0.isEmpty }
         var picked: [String] = []
@@ -193,6 +194,10 @@ final class ModelCatalog: ObservableObject {
                 "google/gemma-3-27b-it",
                 "cohere/command-r-plus",
                 "perplexity/sonar-pro", "perplexity/sonar-reasoning",
+                // Moonshot / Kimi (OpenRouter)
+                "moonshotai/kimi-k3",
+                "moonshotai/kimi-k2.5", "moonshotai/kimi-k2-thinking", "moonshotai/kimi-k2",
+                "~moonshotai/kimi-latest",
                 "nvidia/llama-3.1-nemotron-70b-instruct",
                 "microsoft/phi-4",
                 "openrouter/auto",

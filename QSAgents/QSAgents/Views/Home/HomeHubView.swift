@@ -46,10 +46,10 @@ struct HomeHubView: View {
                 Text("QS Agents")
                     .font(QS.Font.ui(28, weight: .bold))
                     .foregroundStyle(QS.Color.onSurface)
-                Text("Command center multi-agent · terminali reali · git · knowledge")
+                Text(L("Command center multi-agent · terminali reali · git · knowledge"))
                     .font(QS.Font.ui(13))
                     .foregroundStyle(QS.Color.onSurfaceVariant)
-                Text(workspaces.current.map { "Workspace: \($0.name)" } ?? "Nessun workspace — aprine uno per iniziare")
+                Text(workspaces.current.map { "Workspace: \($0.name)" } ?? L("Nessun workspace — aprine uno per iniziare"))
                     .font(QS.Font.codeSM)
                     .foregroundStyle(QS.Color.outline)
 
@@ -170,7 +170,7 @@ struct HomeHubView: View {
                 Text("Modello orchestratore")
                     .font(QS.Font.ui(13, weight: .semibold))
                     .foregroundStyle(QS.Color.onSurface)
-                Text("Cambia al volo — la prossima risposta usa questo provider/modello.")
+                Text(L("Cambia al volo — la prossima risposta usa questo provider/modello."))
                     .font(QS.Font.ui(11))
                     .foregroundStyle(QS.Color.outline)
 
@@ -259,7 +259,7 @@ struct HomeHubView: View {
                 }
                 .frame(height: 8)
 
-                Text("Stima indicativa · non fattura reale. Aggiornato a ogni chiamata LLM.")
+                Text(L("Stima indicativa · non fattura reale. Aggiornato a ogni chiamata LLM."))
                     .font(QS.Font.ui(10))
                     .foregroundStyle(QS.Color.outline)
             }
@@ -423,10 +423,10 @@ struct HomeHubView: View {
 
     private var recentRow: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Workspace recenti")
+            Text(L("Workspace recenti"))
                 .font(QS.Font.ui(13, weight: .semibold))
             if workspaces.recent.isEmpty {
-                Text("Nessuno — usa Apri workspace")
+                Text(L("Nessuno — usa Apri workspace"))
                     .font(QS.Font.ui(11))
                     .foregroundStyle(QS.Color.outline)
             } else {

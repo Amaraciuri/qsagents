@@ -137,65 +137,65 @@ struct QSAgentsApp: App {
                 }
                 .keyboardShortcut("h", modifiers: [.command, .shift])
 
-                Button("Apri Orchestratore (modal)") {
+                Button(L("Apri Orchestratore (modal)")) {
                     appState.openOrchestratorModal()
                 }
                 .keyboardShortcut("k", modifiers: [.command])
 
-                Button("Orchestratore (Chat full)") {
+                Button(L("Orchestratore (Chat full)")) {
                     appState.navigate(to: .orchestrator)
                     appState.orchestratorMode = .chat
                 }
                 .keyboardShortcut("0", modifiers: [.command])
 
-                Button("Terminali") {
+                Button(L("Terminali")) {
                     appState.navigate(to: .dashboard)
                 }
                 .keyboardShortcut("1", modifiers: [.command])
 
-                Button("QS Tasks") {
+                Button(L("QS Tasks")) {
                     appState.navigate(to: .orchestrator)
                     appState.orchestratorMode = .tasks
                 }
                 .keyboardShortcut("2", modifiers: [.command])
 
-                Button("QS Swarm") {
+                Button(L("QS Swarm")) {
                     appState.navigate(to: .orchestrator)
                     appState.orchestratorMode = .swarm
                 }
                 .keyboardShortcut("3", modifiers: [.command])
 
-                Button("Workspace") {
+                Button(L("Workspace")) {
                     appState.navigate(to: .orchestrator)
                     appState.orchestratorMode = .workspace
                 }
                 .keyboardShortcut("4", modifiers: [.command])
 
-                Button("Knowledge Graph") {
+                Button(L("Knowledge Graph")) {
                     appState.navigate(to: .monitor)
                 }
                 .keyboardShortcut("5", modifiers: [.command])
 
-                Button("Integrazioni") {
+                Button(L("Integrazioni")) {
                     appState.openIntegrations()
                 }
                 .keyboardShortcut(",", modifiers: [.command])
 
-                Button("Sicurezza & Guardrail") {
+                Button(L("Sicurezza & Guardrail")) {
                     appState.openSafety()
                 }
                 .keyboardShortcut("s", modifiers: [.command, .shift])
             }
 
-            CommandMenu("Terminale") {
-                Button("Chiudi terminale corrente") {
+            CommandMenu(L("Terminale")) {
+                Button(L("Chiudi terminale corrente")) {
                     if let id = terminals.selectedID {
                         terminals.close(id)
                     }
                 }
                 .keyboardShortcut("w", modifiers: [.command])
 
-                Button("Riavvia terminale corrente") {
+                Button(L("Riavvia terminale corrente")) {
                     if let id = terminals.selectedID {
                         terminals.restart(id)
                     }
@@ -203,18 +203,18 @@ struct QSAgentsApp: App {
                 .keyboardShortcut("r", modifiers: [.command, .shift])
             }
 
-            CommandMenu("Vista") {
-                Button(appState.showLeftSidebar ? "Nascondi sidebar sinistra" : "Mostra sidebar sinistra") {
+            CommandMenu(L("Vista")) {
+                Button(appState.showLeftSidebar ? L("Nascondi sidebar sinistra") : L("Mostra sidebar sinistra")) {
                     appState.toggleLeftSidebar()
                 }
                 .keyboardShortcut("b", modifiers: [.command])
 
-                Button(appState.showRightSidebar ? "Nascondi pannello destro" : "Mostra pannello destro") {
+                Button(appState.showRightSidebar ? L("Nascondi pannello destro") : L("Mostra pannello destro")) {
                     appState.toggleRightSidebar()
                 }
                 .keyboardShortcut("b", modifiers: [.command, .option])
 
-                Button("Nascondi entrambe le sidebar") {
+                Button(L("Nascondi entrambe le sidebar")) {
                     appState.showLeftSidebar = false
                     appState.showRightSidebar = false
                 }
@@ -339,8 +339,8 @@ struct QSAgentsApp: App {
         // First-run / empty feed welcome so the bell isn't a dead control
         if notices.notices.isEmpty {
             notices.post(
-                "Centro notifiche attivo",
-                body: "Qui vedrai terminali, task e eventi safety/orchestratore.",
+                L("Centro notifiche attivo"),
+                body: L("Qui vedrai terminali, task e eventi safety/orchestratore."),
                 kind: .info
             )
             notices.markAllRead()

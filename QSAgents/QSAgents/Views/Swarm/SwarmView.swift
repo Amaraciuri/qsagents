@@ -67,7 +67,7 @@ struct SwarmView: View {
                             .id("agent-console")
                         } else {
                             HStack {
-                                Text("Terminal agent chiuso — i log tool non sono i PTY di «Terminali».")
+                                Text(L("Terminal agent chiuso — i log tool non sono i PTY di «Terminali»."))
                                     .font(QS.Font.ui(11))
                                     .foregroundStyle(QS.Color.outline)
                                 Spacer()
@@ -77,7 +77,7 @@ struct SwarmView: View {
                                         agents.selectedID = agents.sessions.first?.id
                                     }
                                 } label: {
-                                    Label("Apri terminal agent", systemImage: "terminal.fill")
+                                    Label(L("Apri terminal agent"), systemImage: "terminal.fill")
                                         .font(QS.Font.ui(11, weight: .semibold))
                                         .foregroundStyle(QS.Color.primarySolid)
                                 }
@@ -122,7 +122,7 @@ struct SwarmView: View {
                 Text("QS SWARM")
                     .font(QS.Font.ui(12, weight: .bold))
                     .foregroundStyle(QS.Color.onSurface)
-                Text("Missioni multi-agent")
+                Text(L("Missioni multi-agent"))
                     .font(QS.Font.labelXS)
                     .foregroundStyle(QS.Color.outline)
             }
@@ -171,7 +171,7 @@ struct SwarmView: View {
 
             ScrollView {
                 if agents.sessions.isEmpty {
-                    Text("Nessun agent. Lancia una missione sotto.")
+                    Text(L("Nessun agent. Lancia una missione sotto."))
                         .font(QS.Font.ui(11))
                         .foregroundStyle(QS.Color.outline)
                         .padding(.horizontal, 14)
@@ -206,7 +206,7 @@ struct SwarmView: View {
                     Button {
                         agents.removeAll()
                     } label: {
-                        Label("Elimina tutti", systemImage: "trash")
+                        Label(L("Elimina tutti"), systemImage: "trash")
                             .font(QS.Font.ui(11, weight: .semibold))
                             .foregroundStyle(QS.Color.onSurfaceVariant)
                             .frame(maxWidth: .infinity)
@@ -386,10 +386,10 @@ struct SwarmView: View {
             HStack {
                 Image(systemName: "cpu")
                     .foregroundStyle(QS.Color.primarySolid)
-                Text("Modelli missione")
+                Text(L("Modelli missione"))
                     .font(QS.Font.ui(12, weight: .semibold))
                     .foregroundStyle(QS.Color.onSurface)
-                Text("(salva e si applica agli agent che avvii)")
+                Text(L("(salva e si applica agli agent che avvii)"))
                     .font(QS.Font.labelXS)
                     .foregroundStyle(QS.Color.outline)
                 Spacer()
@@ -440,7 +440,7 @@ struct SwarmView: View {
                 roleModelRow(role)
             }
 
-            Text("Gli agent già avviati restano sul modello con cui sono partiti; le nuove missioni usano questa routing.")
+            Text(L("Gli agent già avviati restano sul modello con cui sono partiti; le nuove missioni usano questa routing."))
                 .font(QS.Font.ui(10))
                 .foregroundStyle(QS.Color.outline)
         }

@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import ObjectiveC
 
 /// User-facing language preference for QS Agents (independent of macOS system language).
 enum AppLanguage: String, CaseIterable, Identifiable {
@@ -49,6 +50,44 @@ enum AppLanguage: String, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Runtime Bundle override
+// AppleLanguages alone often needs an app restart. Swizzling Bundle.main lets
+// LocalizedStringKey / NSLocalizedString follow the in-app choice immediately.
+
+private enum AppLanguageBundleOverride {
+    static var code: String = "en"
+    private static var didInstall = false
+
+    static func installIfNeeded() {
+        guard !didInstall else { return }
+        didInstall = true
+        object_setClass(Bundle.main, LanguageAwareBundle.self)
+    }
+
+    static func setCode(_ code: String) {
+        installIfNeeded()
+        self.code = code
+    }
+}
+
+private final class LanguageAwareBundle: Bundle, @unchecked Sendable {
+    override func localizedString(forKey key: String, value: String?, table tableName: String?) -> String {
+        let code = AppLanguageBundleOverride.code
+        if let path = Bundle.main.path(forResource: code, ofType: "lproj"),
+           let langBundle = Bundle(path: path) {
+            let translated = langBundle.localizedString(forKey: key, value: nil, table: tableName)
+            // Only accept a real hit (not the key echoed back) when EN; for IT keys are Italian.
+            if code == "en", translated != key {
+                return translated
+            }
+            if code == "it" {
+                return langBundle.localizedString(forKey: key, value: value, table: tableName)
+            }
+        }
+        return super.localizedString(forKey: key, value: value, table: tableName)
+    }
+}
+
 @MainActor
 final class AppLanguageStore: ObservableObject {
     static let shared = AppLanguageStore()
@@ -67,7 +106,7 @@ final class AppLanguageStore: ObservableObject {
     @Published var preference: AppLanguage {
         didSet {
             UserDefaults.standard.set(preference.rawValue, forKey: Self.defaultsKey)
-            applyAppleLanguages()
+            applyLanguage()
         }
     }
 
@@ -79,11 +118,13 @@ final class AppLanguageStore: ObservableObject {
         // Default English for open-source / international installs; user can switch to Italiano.
         let raw = UserDefaults.standard.string(forKey: Self.defaultsKey) ?? AppLanguage.english.rawValue
         preference = AppLanguage(rawValue: raw) ?? .english
-        applyAppleLanguages()
+        applyLanguage()
     }
 
-    /// Helps Foundation / Bundle lookups follow the in-app choice.
-    private func applyAppleLanguages() {
+    /// Apply in-app language to Bundle + UserDefaults (no restart required).
+    private func applyLanguage() {
+        let code = preference.localizationCode
+        AppLanguageBundleOverride.setCode(code)
         switch preference {
         case .system:
             UserDefaults.standard.removeObject(forKey: "AppleLanguages")
@@ -99,16 +140,19 @@ final class AppLanguageStore: ObservableObject {
         isEnglish ? lang.menuTitleEN : lang.menuTitleIT
     }
 
+    /// Italian source keys → localized string for the active language.
     func t(_ key: String) -> String {
-        if isEnglish {
-            if let fromTable = Self.enTable[key] { return fromTable }
-            if let path = Bundle.main.path(forResource: "en", ofType: "lproj"),
-               let bundle = Bundle(path: path) {
-                let v = NSLocalizedString(key, tableName: nil, bundle: bundle, value: key, comment: "")
-                if v != key { return v }
-            }
-            return key
+        guard isEnglish else { return key }
+
+        if let fromTable = Self.enTable[key], fromTable != key, !fromTable.isEmpty {
+            return fromTable
         }
+        if let path = Bundle.main.path(forResource: "en", ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            let v = bundle.localizedString(forKey: key, value: nil, table: nil)
+            if v != key { return v }
+        }
+        // Missing EN entry: keep the Italian source key (honest fallback).
         return key
     }
 }

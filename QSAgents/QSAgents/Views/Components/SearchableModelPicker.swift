@@ -104,7 +104,7 @@ private struct ModelPickerSheet: View {
                         }
                     }
                     .buttonStyle(.plain)
-                    .help("Opzionale: scarica un sottoinsieme OpenRouter (non l’intero catalogo)")
+                    .help(L("Opzionale: scarica un sottoinsieme OpenRouter (non l’intero catalogo)"))
 
                     if catalog.includeRemoteOpenRouter {
                         Button {

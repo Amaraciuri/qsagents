@@ -43,11 +43,11 @@ struct AppShellView: View {
             HStack(spacing: 16) {
                 HStack(spacing: 6) {
                     Circle().fill(QS.Color.agentActive).frame(width: 7, height: 7)
-                    Text("SISTEMA ONLINE")
+                    Text(L("SISTEMA ONLINE"))
                         .font(QS.Font.labelXS)
                         .foregroundStyle(QS.Color.onSurfaceVariant)
                 }
-                Text("\(terminals.activeCount) TERMINALI")
+                Text("\(terminals.activeCount) \(L("Terminali").uppercased())")
                     .font(QS.Font.labelXS)
                     .foregroundStyle(QS.Color.outline)
                 // Environment / safety badge
@@ -63,7 +63,7 @@ struct AppShellView: View {
                     .foregroundStyle(Color(hex: safety.environment.colorHex))
                 }
                 .buttonStyle(.plain)
-                .help("Ambiente e guardrail QS Agents")
+                .help(L("Ambiente e guardrail QS Agents"))
 
                 Text(probe.snapshot.username)
                     .font(QS.Font.labelXS)
@@ -444,7 +444,7 @@ struct StandardSidebar: View {
                     Text("QS AGENTS")
                         .font(QS.Font.ui(12, weight: .bold))
                         .foregroundStyle(QS.Color.onSurface)
-                    Text("Navigazione")
+                    Text(L("Navigazione"))
                         .font(QS.Font.labelXS)
                         .foregroundStyle(QS.Color.outline)
                 }
@@ -512,12 +512,12 @@ struct BottomStatusBar: View {
                 Circle()
                     .fill(state.systemOnline ? QS.Color.agentActive : QS.Color.agentError)
                     .frame(width: 7, height: 7)
-                Text(leftText ?? (state.systemOnline ? "SISTEMA ONLINE" : "OFFLINE"))
+                Text(leftText ?? (state.systemOnline ? L("SISTEMA ONLINE") : L("OFFLINE")))
                     .font(QS.Font.labelXS)
                     .foregroundStyle(QS.Color.onSurfaceVariant)
             }
 
-            Text("AGENTI ATTIVI: \(state.activeAgentCount)")
+            Text("\(L("AGENTI ATTIVI")): \(state.activeAgentCount)")
                 .font(QS.Font.labelXS)
                 .foregroundStyle(QS.Color.outline)
 

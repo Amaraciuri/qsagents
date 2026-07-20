@@ -14,7 +14,7 @@ SRC_SWIFT = ROOT / "QSAgents"
 
 STRING_RE = re.compile(
     r'(?:Text|Label|Button|Section|PrimaryButton|GhostButton|SidebarNavRow|SectionLabel|'
-    r'\.navigationTitle|\.help|\.alert|Toggle)\s*\(\s*"([^"\\]*(?:\\.[^"\\]*)*)"'
+    r'CommandMenu|\.navigationTitle|\.help|\.alert|Toggle)\s*\(\s*(?:L\()?\s*"([^"\\]*(?:\\.[^"\\]*)*)"'
 )
 
 
@@ -280,8 +280,82 @@ EXACT: dict[str, str] = {
     "live": "live",
     "Git": "Git",
     "OpenRouter": "OpenRouter",
+    "Ambiente e guardrail QS Agents": "QS Agents environment & guardrails",
+    "Knowledge Graph": "Knowledge Graph",
+    "QS Tasks": "QS Tasks",
+    "QS Swarm": "QS Swarm",
+    "Workspace": "Workspace",
+    "Help": "Help",
+    "Chat": "Chat",
+    "Knowledge": "Knowledge",
+    "Missioni multi-agent": "Multi-agent missions",
+    "Modelli missione": "Mission models",
+    "(salva e si applica agli agent che avvii)": "(saved and applied to agents you start)",
+    "Stop tutti": "Stop all",
+    "Nessuna missione attiva": "No active mission",
+    "Default (Home)": "Default (Home)",
+    "Command center multi-agent · terminali reali · git · knowledge": "Multi-agent command center — real terminals — git — knowledge",
+    "Nessun workspace — aprine uno per iniziare": "No workspace — open one to get started",
     "Command center multi-agent - terminali reali - git - knowledge": "Multi-agent command center — real terminals — git — knowledge",
     "Command center multi-agent — terminali reali — git — knowledge": "Multi-agent command center — real terminals — git — knowledge",
+    # High-visibility chrome (sidebar / menus / status) — must not stay Italian
+    "Navigazione": "Navigation",
+    "Terminali": "Terminals",
+    "Terminali PTY": "PTY Terminals",
+    "Viste": "Views",
+    "Home": "Home",
+    "Tutorial": "Tutorial",
+    "Permessi": "Permissions",
+    "Docs": "Docs",
+    "SISTEMA ONLINE": "SYSTEM ONLINE",
+    "OFFLINE": "OFFLINE",
+    "AGENTI ATTIVI": "ACTIVE AGENTS",
+    "Workspace recenti": "Recent workspaces",
+    "Nessuno — usa Apri workspace": "None — use Open workspace",
+    "Nessun agent. Lancia una missione sotto.": "No agents. Start a mission below.",
+    "Apri Orchestratore (modal)": "Open Orchestrator (modal)",
+    "Orchestratore (Chat full)": "Orchestrator (full chat)",
+    "Sicurezza & Guardrail": "Safety & Guardrails",
+    "Chiudi terminale corrente": "Close current terminal",
+    "Riavvia terminale corrente": "Restart current terminal",
+    "Nascondi sidebar sinistra": "Hide left sidebar",
+    "Mostra sidebar sinistra": "Show left sidebar",
+    "Nascondi pannello destro": "Hide right panel",
+    "Mostra pannello destro": "Show right panel",
+    "Nascondi entrambe le sidebar": "Hide both sidebars",
+    "Terminale": "Terminal",
+    "Vista": "View",
+    "Cambia al volo — la prossima risposta usa questo provider/modello.": "Switch on the fly — the next reply uses this provider/model.",
+    "Stima indicativa · non fattura reale. Aggiornato a ogni chiamata LLM.": "Indicative estimate · not a real invoice. Updated on every LLM call.",
+    "Key da openrouter.ai/keys · formato tipico sk-or-v1-… · dopo Salva usa «Test».": "Key from openrouter.ai/keys · typical format sk-or-v1-… · after Save use «Test».",
+    "Opzionale: scarica un sottoinsieme OpenRouter (non l’intero catalogo)": "Optional: download an OpenRouter subset (not the full catalog)",
+    "Nessuna key OpenRouter": "No OpenRouter key",
+    "Apri terminal agent": "Open agent terminal",
+    "Elimina tutti": "Delete all",
+    "Gli agent già avviati restano sul modello con cui sono partiti; le nuove missioni usano questa routing.": "Already-running agents keep the model they started with; new missions use this routing.",
+    "Terminal agent chiuso — i log tool non sono i PTY di «Terminali».": "Agent terminal closed — tool logs are not the PTY tabs under Terminals.",
+    "tool stream · non è lo shell PTY sopra": "tool stream · not the PTY shell above",
+    "Tool stream LLM — non è lo shell PTY di Terminali. Copia con il bottone in alto.": "LLM tool stream — not the Terminals PTY shell. Copy with the button above.",
+    "Lista vuota. Con modalità «Blocca» nessun terminale fuori lista potrà aprire/eseguire.": "Empty list. In Block mode no terminal outside the list can open/run.",
+    "«\(t.title)» verrà rimossa. Non si può annullare.": "«\(t.title)» will be removed. This cannot be undone.",
+    "L'azione non si può annullare.": "This action cannot be undone.",
+    "Rimuove le card selezionate (\(scope)). Non si può annullare.": "Removes the selected cards (\(scope)). This cannot be undone.",
+    "Non è un menu di cucina: è un preferito.": "Not a recipe menu — it’s a saved shortcut.",
+    "Suggerimento: tenni questa pagina aperta la prima settimana; poi Impostazioni → Novità per le release.": "Tip: keep this page open the first week; then Settings → What’s New for releases.",
+    "Suggerimento: tieni questa pagina aperta la prima settimana; poi Impostazioni → Novità per le release.": "Tip: keep this page open the first week; then Settings → What’s New for releases.",
+    "profondità top→bottom · linee = contains / imports": "depth top→bottom · lines = contains / imports",
+    "Profondità max: \(maxD)": "Max depth: \(maxD)",
+    "Clicca un nodo per vedere path, profondità e collegamenti.\n\n• Linee grigie = contains (albero cartelle)\n• Linee tratteggiate verdi = imports tra file\n• Pinch/drag per zoom e pan": "Click a node to see path, depth, and links.\n\n• Grey lines = contains (folder tree)\n• Dashed green lines = imports between files\n• Pinch/drag to zoom and pan",
+    "Cosa è cambiato in QS Agents — senza aprire git.": "What changed in QS Agents — without opening git.",
+    "Questo è il changelog **prodotto** dell’app. Il log git del workspace si apre da Git → Log o chiedendo `changelog` all’orchestratore.": "This is the app **product** changelog. The workspace git log opens from Git → Log or by asking the orchestrator for `changelog`.",
+    "Centro notifiche attivo": "Notification center active",
+    "Qui vedrai terminali, task e eventi safety/orchestratore.": "You’ll see terminals, tasks, and safety/orchestrator events here.",
+    "Task completata": "Task completed",
+    "Terminale terminato": "Terminal exited",
+    "Terminale fallito (exit \(code))": "Terminal failed (exit \(code))",
+    "Task in review": "Task in review",
+    "Nessuna API key per questo ruolo. Configura Anthropic/OpenRouter/Grok in Integrazioni + routing Swarm. Task → REVIEW (no auto-rilancio).": "No API key for this role. Configure Anthropic/OpenRouter/Grok in Integrations + Swarm routing. Task → REVIEW (no auto-relaunch).",
+    "Policy Anthropic (2026): il login Pro/Max di Claude Code **non** può essere riusato in app terze. Serve una API key da Console.": "Anthropic policy (2026): Claude Code Pro/Max login **cannot** be reused in third-party apps. You need an API key from Console.",
 }
 
 # Prefix / fragment rewrites applied left-to-right when no exact match.
@@ -436,8 +510,10 @@ def heuristic_translate(s: str) -> str:
 
 def main() -> None:
     strings: list[str] = load_strings()
+    # Always include curated EXACT keys (sidebar titles, menus, status chrome, etc.)
+    all_keys = sorted(set(strings) | set(EXACT.keys()), key=lambda x: (x.lower(), x))
     en_map: dict[str, str] = {}
-    for s in strings:
+    for s in all_keys:
         en_map[s] = heuristic_translate(s)
 
     OUT_EN.parent.mkdir(parents=True, exist_ok=True)

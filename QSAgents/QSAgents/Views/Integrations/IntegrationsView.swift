@@ -914,7 +914,7 @@ struct IntegrationCard: View {
                     }
 
                     if item.name == "OpenRouter" {
-                        Text("Key da openrouter.ai/keys · formato tipico sk-or-v1-… · dopo Salva usa «Test».")
+                        Text(L("Key da openrouter.ai/keys · formato tipico sk-or-v1-… · dopo Salva usa «Test»."))
                             .font(QS.Font.ui(10))
                             .foregroundStyle(QS.Color.outline)
                     } else if item.name == "GitHub" {
