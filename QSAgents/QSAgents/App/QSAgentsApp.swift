@@ -243,8 +243,18 @@ struct QSAgentsApp: App {
         AppConfig.applyProductionDefaults()
         CrashReporter.installIfEnabled()
         probe.start(interval: 3)
-        // Non-interactive Keychain reads only (no “Allow keychain access?” storm at launch)
-        appState.refreshIntegrationStatuses()
+        // Integration status uses Keychain — never do the first fill on the main thread.
+        // Prefetch off-main, then refresh UI once the process cache is warm.
+        let keyAccounts = LLMProviderKind.allCases.flatMap { [$0.keychainAccount] + $0.legacyKeychainAccounts }
+            + ["GitHub", "OpenAI", "OpenRouter", "Anthropic", "xAI"]
+        KeychainStore.prefetch(keyAccounts)
+        Task.detached(priority: .utility) {
+            // Give background fills a brief head start (Keychain ops are timed out).
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            await MainActor.run {
+                appState.refreshIntegrationStatuses()
+            }
+        }
         // Do NOT request mic/speech at launch — only when user taps 🎤
         voice.refreshAuthorization()
         terminals.safety = safety

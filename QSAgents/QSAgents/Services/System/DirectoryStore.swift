@@ -45,7 +45,8 @@ final class DirectoryStore: ObservableObject {
     init() {
         loadPersisted()
         rebuildQuickAccess()
-        Task { await scanProjects() }
+        // Deferred so first frame is not competing with project discovery.
+        Task(priority: .utility) { await scanProjects() }
     }
 
     var filteredProjects: [DirectoryEntry] {
@@ -130,72 +131,91 @@ final class DirectoryStore: ObservableObject {
     }
 
     /// Deep-ish scan of common roots for git projects / package dirs.
+    /// Heavy filesystem work runs off the main actor — scanning ~/Documents on MainActor
+    /// froze launch (spinning cursor, no window) on large home directories.
     func scanProjects() async {
+        let found = await Task.detached(priority: .utility) {
+            Self.discoverProjects()
+        }.value
+        projects = found
+    }
+
+    nonisolated private static func discoverProjects() -> [DirectoryEntry] {
         let home = NSHomeDirectory()
-        let roots = [
-            home + "/Projects",
-            home + "/Developer",
-            home + "/dev",
-            home + "/code",
-            home + "/repos",
-            home + "/work",
-            home + "/qsagents",
-            home + "/Documents",
+        // Prefer explicit project roots. ~/Documents is last and only scanned 1 level deep —
+        // hang reports showed main-thread freezes on iCloud dataless materialization there.
+        let roots: [(path: String, depth: Int)] = [
+            (home + "/Projects", 2),
+            (home + "/Developer", 2),
+            (home + "/dev", 2),
+            (home + "/code", 2),
+            (home + "/repos", 2),
+            (home + "/work", 2),
+            (home + "/qsagents", 2),
+            (home + "/Documents", 1),
         ]
-        let fm = FileManager.default
         var found: [DirectoryEntry] = []
         var seen = Set<String>()
 
-        for root in roots {
-            var isDir: ObjCBool = false
-            guard fm.fileExists(atPath: root, isDirectory: &isDir), isDir.boolValue else { continue }
+        for (root, maxDepth) in roots {
+            guard isLocalDirectory(root) else { continue }
             // root itself if project-like
             if isProjectLike(root) {
                 let p = (root as NSString).standardizingPath
                 if seen.insert(p).inserted {
-                    found.append(.init(path: p, kind: .discovered, isGit: fm.fileExists(atPath: p + "/.git")))
+                    found.append(.init(path: p, kind: .discovered, isGit: hasLocalGit(root)))
                 }
             }
-            guard let kids = try? fm.contentsOfDirectory(atPath: root) else { continue }
-            for name in kids where !name.hasPrefix(".") {
-                let full = root + "/" + name
-                var kidDir: ObjCBool = false
-                guard fm.fileExists(atPath: full, isDirectory: &kidDir), kidDir.boolValue else { continue }
-                if isProjectLike(full) {
-                    let p = (full as NSString).standardizingPath
-                    if seen.insert(p).inserted {
-                        found.append(.init(
-                            path: p,
-                            kind: .discovered,
-                            isGit: fm.fileExists(atPath: p + "/.git"),
-                            subtitle: root.replacingOccurrences(of: home, with: "~")
-                        ))
-                    }
-                }
-                // one more level
-                if let grand = try? fm.contentsOfDirectory(atPath: full) {
-                    for g in grand where !g.hasPrefix(".") {
-                        let gfull = full + "/" + g
-                        var gDir: ObjCBool = false
-                        guard fm.fileExists(atPath: gfull, isDirectory: &gDir), gDir.boolValue else { continue }
-                        if isProjectLike(gfull) {
-                            let p = (gfull as NSString).standardizingPath
-                            if seen.insert(p).inserted {
-                                found.append(.init(
-                                    path: p,
-                                    kind: .discovered,
-                                    isGit: fm.fileExists(atPath: p + "/.git"),
-                                    subtitle: full.replacingOccurrences(of: home, with: "~")
-                                ))
-                            }
-                        }
-                    }
-                }
-            }
+            scanChildren(
+                of: root,
+                home: home,
+                remainingDepth: maxDepth,
+                found: &found,
+                seen: &seen
+            )
         }
 
         found.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-        projects = found
+        return found
+    }
+
+    /// Enumerate immediate children; recurse while `remainingDepth > 1`.
+    nonisolated private static func scanChildren(
+        of root: String,
+        home: String,
+        remainingDepth: Int,
+        found: inout [DirectoryEntry],
+        seen: inout Set<String>
+    ) {
+        guard remainingDepth >= 1 else { return }
+        // Avoid contentsOfDirectory on pure cloud roots (can stall waiting for materialization).
+        guard !isCloudOnlyDirectory(root) else { return }
+        guard let kids = listDirectoryNames(root) else { return }
+
+        for name in kids where !name.hasPrefix(".") {
+            let full = root + "/" + name
+            guard isLocalDirectory(full) else { continue }
+            if isProjectLike(full) {
+                let p = (full as NSString).standardizingPath
+                if seen.insert(p).inserted {
+                    found.append(.init(
+                        path: p,
+                        kind: .discovered,
+                        isGit: hasLocalGit(full),
+                        subtitle: root.replacingOccurrences(of: home, with: "~")
+                    ))
+                }
+            }
+            if remainingDepth > 1 {
+                scanChildren(
+                    of: full,
+                    home: home,
+                    remainingDepth: remainingDepth - 1,
+                    found: &found,
+                    seen: &seen
+                )
+            }
+        }
     }
 
     func resolveUserPath(_ raw: String) -> String? {
@@ -230,25 +250,70 @@ final class DirectoryStore: ObservableObject {
 
     // MARK: - Private
 
-    private func isProjectLike(_ path: String) -> Bool {
-        let fm = FileManager.default
-        let markers = [
-            ".git", "Package.swift", "package.json", "Cargo.toml", "go.mod",
-            "pyproject.toml", "Podfile", "*.xcodeproj", "Gemfile", "composer.json",
-            "CMakeLists.txt", "Makefile", "README.md"
-        ]
-        for m in markers {
-            if m.contains("*") {
-                // xcodeproj
-                if let kids = try? fm.contentsOfDirectory(atPath: path),
-                   kids.contains(where: { $0.hasSuffix(".xcodeproj") || $0.hasSuffix(".xcworkspace") }) {
-                    return true
-                }
-            } else if fm.fileExists(atPath: path + "/" + m) {
+    // MARK: - Filesystem helpers (must not force iCloud materialization)
+
+    /// Project markers. Deliberately omit README.md — too common and often a cloud-only
+    /// placeholder; `fileExists` on dataless files triggers `apfs_materialize_dataless_file_ext`
+    /// and freezes the caller (see hang report 2026-07-23).
+    private static let projectMarkers = [
+        ".git", "Package.swift", "package.json", "Cargo.toml", "go.mod",
+        "pyproject.toml", "Podfile", "Gemfile", "composer.json",
+        "CMakeLists.txt", "Makefile",
+    ]
+
+    nonisolated private static func isProjectLike(_ path: String) -> Bool {
+        // Cheap name-list first (no per-marker stat that could materialize cloud blobs).
+        if let kids = listDirectoryNames(path) {
+            if kids.contains(where: { $0.hasSuffix(".xcodeproj") || $0.hasSuffix(".xcworkspace") }) {
+                return true
+            }
+            let set = Set(kids)
+            for m in projectMarkers where set.contains(m) {
                 return true
             }
         }
         return false
+    }
+
+    nonisolated private static func hasLocalGit(_ path: String) -> Bool {
+        guard let kids = listDirectoryNames(path) else { return false }
+        return kids.contains(".git")
+    }
+
+    /// Name-only listing (no per-child stat that could materialize iCloud placeholders).
+    nonisolated private static func listDirectoryNames(_ path: String) -> [String]? {
+        try? FileManager.default.contentsOfDirectory(atPath: path)
+    }
+
+    /// True only for real local directories. Skips files and non-downloaded iCloud items.
+    nonisolated private static func isLocalDirectory(_ path: String) -> Bool {
+        let url = URL(fileURLWithPath: path)
+        guard let rv = try? url.resourceValues(forKeys: [
+            .isDirectoryKey,
+            .isSymbolicLinkKey,
+            .isUbiquitousItemKey,
+            .ubiquitousItemDownloadingStatusKey,
+        ]) else {
+            // resourceValues failed — do not fall back to fileExists (can materialize).
+            return false
+        }
+        if rv.isSymbolicLink == true { return false }
+        guard rv.isDirectory == true else { return false }
+        if rv.isUbiquitousItem == true {
+            // Only walk fully current (downloaded) cloud folders.
+            return rv.ubiquitousItemDownloadingStatus == .current
+        }
+        return true
+    }
+
+    nonisolated private static func isCloudOnlyDirectory(_ path: String) -> Bool {
+        let url = URL(fileURLWithPath: path, isDirectory: true)
+        guard let rv = try? url.resourceValues(forKeys: [
+            .isUbiquitousItemKey,
+            .ubiquitousItemDownloadingStatusKey,
+        ]) else { return false }
+        guard rv.isUbiquitousItem == true else { return false }
+        return rv.ubiquitousItemDownloadingStatus != .current
     }
 
     private func loadPersisted() {

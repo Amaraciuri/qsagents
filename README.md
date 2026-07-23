@@ -32,7 +32,7 @@ IDEs give you one agent in a chat pane. **QS Agents** is a **control room**: mul
 
 **Download (recommended):** notarized Developer ID build from GitHub Releases.
 
-1. Get **[QS-Agents.zip](https://github.com/Amaraciuri/qsagents/releases/download/v1.0.5/QS-Agents.zip)**
+1. Get **[QS-Agents.zip](https://github.com/Amaraciuri/qsagents/releases/download/v1.0.6/QS-Agents.zip)**
 2. Unzip → open **QS Agents.app** (Gatekeeper: *Notarized Developer ID*)
 3. Onboarding → paste provider keys in **Integrations** (Keychain) → open a workspace
 
@@ -180,7 +180,7 @@ NOTARIZE=1 UPLOAD=1 ./scripts/ship_check.sh
 ditto -c -k --keepParent \
   "build/Build/Products/Release/QS Agents.app" ~/Desktop/QS-Agents.zip
 ./scripts/fetch_sparkle_tools.sh
-./scripts/make_appcast.sh ~/Desktop/QS-Agents.zip 1.0.5 18
+./scripts/make_appcast.sh ~/Desktop/QS-Agents.zip 1.0.6 19
 # commit appcast → push main → GitHub Release asset QS-Agents.zip
 ```
 
@@ -222,4 +222,19 @@ Security-sensitive reports: open a **private** GitHub advisory or email `privacy
 
 ---
 
-*QS Agents 1.0.2 — local-first multi-agent command center for macOS.*
+## Changelog (recent)
+
+### [1.0.6](https://github.com/Amaraciuri/qsagents/releases/tag/v1.0.6) — 2026-07-23
+
+- **Fix launch hang** — app no longer freezes on open (spinning cursor, no window)
+- Project discovery runs **off the main thread** and skips **iCloud dataless** folders (no wait on `apfs_materialize_dataless_file_ext`)
+- **Keychain** reads never block the UI; 1.5s timeout + session-only fallback when `securityd` stalls
+- Approval HMAC secret loads asynchronously so bootstrap always completes
+
+### [1.0.5](https://github.com/Amaraciuri/qsagents/releases/tag/v1.0.5) — 2026-07-20
+
+- Knowledge Operativa, task Avvia/Continua/Revisiona, OpenRouter 402 UX
+
+---
+
+*QS Agents 1.0.6 — local-first multi-agent command center for macOS.*

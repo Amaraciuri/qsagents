@@ -6,24 +6,24 @@
     <description>Aggiornamenti QS Agents (Developer ID + notarized).</description>
     <language>it</language>
     <item>
-      <title>QS Agents 1.0.5</title>
-      <pubDate>Mon, 20 Jul 2026 10:47:00 +0000</pubDate>
-      <sparkle:version>18</sparkle:version>
-      <sparkle:shortVersionString>1.0.5</sparkle:shortVersionString>
+      <title>QS Agents 1.0.6</title>
+      <pubDate>Thu, 23 Jul 2026 07:18:55 +0000</pubDate>
+      <sparkle:version>19</sparkle:version>
+      <sparkle:shortVersionString>1.0.6</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
       <description><![CDATA[
         <ul>
-          <li>Knowledge Operativa (TABELLA OPERATIVA)</li>
-          <li>Avvia / Continua / Revisiona + archive panel</li>
-          <li>OpenRouter 402 credits UX + max_tokens caps</li>
-          <li>QS Agents 1.0.5 (build 18)</li>
+          <li>Fix launch hang (main-thread freeze on project scan + Keychain)</li>
+          <li>Skip iCloud dataless materialization during project discovery</li>
+          <li>Keychain reads never block UI; timeout + session fallback</li>
+          <li>QS Agents 1.0.6 (build 19)</li>
         </ul>
       ]]></description>
       <enclosure
-        url="https://github.com/Amaraciuri/qsagents/releases/download/v1.0.5/QS-Agents.zip"
-        length="6444625"
+        url="https://github.com/Amaraciuri/qsagents/releases/download/v1.0.6/QS-Agents.zip"
+        length="6539529"
         type="application/octet-stream"
-        sparkle:edSignature="hNLbrU0yhNJfNNd4s3DbGnpE5IUbRc8+4P+phNH+m30+PFjd8DJkRI89ISyRoF2dNzZTt32eWs6AkplC1HcnDA==" />
+        sparkle:edSignature="+n7gXcope9GINQrenHilOvP75JeQrSuVvXPcLTFZ8WWEqhrlSJ4RvS4qRS3oD9VCj0VTb3EpdAuFJu2nnCkxDw==" />
     </item>
   </channel>
 </rss>

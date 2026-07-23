@@ -13,7 +13,7 @@ final class ApprovalSigningService: ObservableObject {
 
     private let directory: URL
     private let logFile: URL
-    private let secretKey: SymmetricKey
+    private var secretKey: SymmetricKey
     private var lastHash: String = "GENESIS"
 
     private let secretAccount = "QSAgents.ApprovalLog.HMAC"
@@ -26,22 +26,36 @@ final class ApprovalSigningService: ObservableObject {
         logFile = base.appendingPathComponent("approval-chain.jsonl")
         try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
 
-        if let existing = KeychainStore.get(secretAccount, interactive: false),
-           let data = Data(base64Encoded: existing) {
-            secretKey = SymmetricKey(data: data)
-        } else {
-            // Non-interactive: if Keychain is locked/denied we keep an ephemeral key for this session
-            // instead of spawning new “Allow keychain” dialogs at every launch.
-            var bytes = [UInt8](repeating: 0, count: 32)
-            _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
-            let data = Data(bytes)
-            secretKey = SymmetricKey(data: data)
-            if !KeychainStore.set(data.base64EncodedString(), for: secretAccount) {
+        // Never block app launch on Keychain: securityd has been observed hanging forever on
+        // legacy ACL items for this secret, freezing the main thread (spinning cursor, no window).
+        // Start with an ephemeral key; resolve Keychain off the main actor after first frame.
+        var bytes = [UInt8](repeating: 0, count: 32)
+        _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+        secretKey = SymmetricKey(data: Data(bytes))
+
+        loadTail()
+
+        let account = secretAccount
+        let ephemeralB64 = Data(bytes).base64EncodedString()
+        Task(priority: .utility) { [weak self] in
+            let existing = await Task.detached(priority: .utility) {
+                KeychainStore.get(account, interactive: false)
+            }.value
+            if let existing, let data = Data(base64Encoded: existing) {
+                await MainActor.run {
+                    guard let self else { return }
+                    self.secretKey = SymmetricKey(data: data)
+                    AppLogger.info("Approval HMAC secret loaded from Keychain (async)")
+                }
+                return
+            }
+            let saved = await Task.detached(priority: .utility) {
+                KeychainStore.set(ephemeralB64, for: account)
+            }.value
+            if !saved {
                 AppLogger.info("Approval HMAC secret is session-only (Keychain unavailable)")
             }
         }
-
-        loadTail()
     }
 
     var logDirectoryPath: String { directory.path }

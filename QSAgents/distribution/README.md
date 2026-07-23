@@ -22,7 +22,7 @@ NOTARIZE=1 UPLOAD=1 ./scripts/ship_check.sh
 ditto -c -k --keepParent \
   "build/Build/Products/Release/QS Agents.app" \
   ~/Desktop/QS-Agents.zip
-./scripts/make_appcast.sh ~/Desktop/QS-Agents.zip 1.3.10 12
+./scripts/make_appcast.sh ~/Desktop/QS-Agents.zip 1.0.6 19
 # Commit appcast.xml, push main
-# Crea GitHub Release v1.3.10 e carica QS-Agents.zip (stesso nome dell’URL in appcast)
+# Crea GitHub Release v1.0.6 e carica QS-Agents.zip (stesso nome dell’URL in appcast)
 ```
